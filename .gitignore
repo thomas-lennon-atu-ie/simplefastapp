@@ -37,3 +37,4 @@ yarn-error.*
 
 # environmental
 /google-services.json
+/serviceaccount-key.json
