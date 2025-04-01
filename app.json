@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "SimpleFastApp",
-    "slug": "SimpleFastApp",
+    "slug": "simplefast",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -23,6 +23,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "cc4fda45-3e1f-4ec3-a23a-f57bbfc1be34"
+      }
+    },
+    "owner": "thomaslennon"
   }
 }
