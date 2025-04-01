@@ -41,3 +41,8 @@ yarn-error.*
 /simple-fast.keystore
 /@thomaslennon__simplefast.jks
 /.idea/
+/firebase-debug.log
+/firebase.json/
+.firebaserc
+#build
+/public/
