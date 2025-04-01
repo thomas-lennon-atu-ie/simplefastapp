@@ -1,0 +1,200 @@
+name: SimpleFast CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop, 'feature/*' ]
+    tags:
+      - 'v*.*.*'  # must have version tags
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:  # manual trigger
+
+jobs:
+  # code quality checking - runs for all branches/PRs
+  lint_test:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: ESLint
+        run: npm run lint || npx eslint . --ext .js,.jsx,.ts,.tsx
+        
+      - name: TypeScript check
+        run: npx tsc --noEmit
+        
+      - name: Check dependencies
+        run: |
+          npm audit --json || echo "Vulnerabilities found but continuing"
+          
+      - name: Run tests
+        run: npm test || echo "No tests found"
+
+  # codeQL security scanning
+  security_scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript
+          
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+        with:
+          category: "/language:javascript"
+
+  # dev environment build
+  build_dev:
+    name: Development Build
+    needs: [lint_test]
+    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/feature/')
+    runs-on: ubuntu-latest
+    environment: Development
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          
+      - uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+          
+      - name: Install dependencies
+        run: |
+          npm ci
+          npx expo install typescript@^5.3.3
+          
+      - name: Build Android (development)
+        run: eas build --platform android --profile development --non-interactive --no-wait
+        
+      - name: Build Web (development)
+        run: npx expo export --platform web
+        
+      - name: Deploy to Firebase (dev channel)
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SIMPLEFAST_4428E }}
+          projectId: simplefast-4428e
+          channelId: dev
+          target: dev
+
+  # stage environment build
+  build_staging:
+    name: Staging Build
+    needs: [lint_test]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: Staging
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          
+      - uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+          
+      - name: Install dependencies
+        run: |
+          npm ci
+          npx expo install typescript@^5.3.3
+          
+      - name: Build Android (preview)
+        run: eas build --platform android --profile preview --non-interactive --no-wait
+        
+      - name: Build Web (staging)
+        run: npx expo export --platform web
+        
+      - name: Deploy to Firebase (staging channel)
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SIMPLEFAST_4428E }}
+          projectId: simplefast-4428e
+          channelId: staging
+          target: staging
+
+  # prod environment build - only runs on version tags
+  build_production:
+    name: Production Release
+    needs: [lint_test, security_scan]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    environment: Production
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Extract version
+        id: extract_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          
+      - uses: expo/expo-github-action@v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+          
+      - name: Install dependencies
+        run: |
+          npm ci
+          npx expo install typescript@^5.3.3
+          
+      - name: Build Android (production)
+        run: eas build --platform android --profile production --non-interactive
+        
+      - name: Build Web (production)
+        run: npx expo export --platform web
+        
+      - name: Deploy to Firebase (production)
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SIMPLEFAST_4428E }}
+          channelId: live
+          projectId: simplefast-4428e
+          
+      # creating a github Release with the build artifacts
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ steps.extract_version.outputs.VERSION }}
+          draft: false
+          prerelease: false

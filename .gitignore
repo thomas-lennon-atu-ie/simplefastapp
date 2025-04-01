@@ -44,4 +44,5 @@ yarn-error.*
 /firebase-debug.log
 /firebase.json/
 .firebaserc
+/.firebase/
 #build
