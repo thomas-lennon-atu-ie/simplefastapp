@@ -45,4 +45,3 @@ yarn-error.*
 /firebase.json/
 .firebaserc
 #build
-/public/
