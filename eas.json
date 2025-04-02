@@ -9,7 +9,8 @@
       "distribution": "internal",
       "env": {
         "APP_ENV": "development"
-      }
+      },
+      "channel": "development"
     },
     "preview": {
       "distribution": "internal",
@@ -18,14 +19,15 @@
       },
       "env": {
         "APP_ENV": "staging"
-      }
-    
+      },
+      "channel": "staging"
     },
     "production": {
       "autoIncrement": true,
       "env": {
         "APP_ENV": "production"
-      }
+      },
+      "channel": "production"
     }
   },
   "submit": {

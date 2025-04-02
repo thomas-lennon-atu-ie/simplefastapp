@@ -6,7 +6,13 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "test": "jest --watchAll",
+    "build:web": "expo export --platform web",
+    "build:android:dev": "eas build --platform android --profile development --non-interactive --no-wait",
+    "build:android:staging": "eas build --platform android --profile preview --non-interactive --no-wait",
+    "build:android:prod": "eas build --platform android --profile production --non-interactive"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "1.23.1",
