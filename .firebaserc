@@ -5,9 +5,15 @@
   "targets": {
     "simplefast-4428e": {
       "hosting": {
-        "dev": ["simplefast-dev"],
-        "staging": ["simplefast-staging"],
-        "production": ["simplefast-4428e"]
+        "dev": [
+          "simplefast-dev"
+        ],
+        "staging": [
+          "simplefast-staging"
+        ],
+        "production": [
+          "simplefast-4428e"
+        ]
       }
     }
   }
