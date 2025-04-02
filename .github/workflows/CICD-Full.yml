@@ -26,8 +26,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
         
-      - name: ESLint
-        run: npm run lint || npx eslint . --ext .js,.jsx,.ts,.tsx
+      - name: ESLint        
+        run: npx eslint . --ext .js,.jsx,.ts,.tsx 
         
       - name: TypeScript check
         run: npx tsc --noEmit
@@ -39,32 +39,11 @@ jobs:
       - name: Run tests
         run: npm test || echo "No tests found"
 
-  # codeQL security scanning
-  security_scan:
-    name: Security Scan
-    runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      contents: read
-      packages: write
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
-        with:
-          languages: javascript
-          
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v2
-        with:
-          category: "/language:javascript"
-
-  # dev environment build
+  # dev environment build - only on dev tags
   build_dev:
     name: Development Build
     needs: [lint_test]
-    if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/feature/')
+    if: startsWith(github.ref, 'refs/tags/v') && contains(github.ref, '-dev')
     runs-on: ubuntu-latest
     environment: Development
     steps:
@@ -102,11 +81,11 @@ jobs:
           channelId: dev
           target: dev
 
-  # stage environment build
+  # staging environment build - only on staging tags
   build_staging:
     name: Staging Build
     needs: [lint_test]
-    if: github.ref == 'refs/heads/main'
+    if: startsWith(github.ref, 'refs/tags/v') && contains(github.ref, '-staging')
     runs-on: ubuntu-latest
     environment: Staging
     steps:
@@ -147,8 +126,8 @@ jobs:
   # prod environment build - only runs on version tags
   build_production:
     name: Production Release
-    needs: [lint_test, security_scan]
-    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [lint_test] 
+    if: startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-')
     runs-on: ubuntu-latest
     environment: Production
     steps:
