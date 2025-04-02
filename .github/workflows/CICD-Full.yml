@@ -26,10 +26,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
         
-      - name: ESLint
-        env:
-          ESLINT_USE_FLAT_CONFIG: "false"
-        run: npx eslint --config .eslintrc.js . --ext .js,.jsx,.ts,.tsx
+      - name: ESLint        
+        run: npx eslint . --ext .js,.jsx,.ts,.tsx
         
       - name: TypeScript check
         run: npx tsc --noEmit
