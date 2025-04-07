@@ -1,21 +1,22 @@
+import { StackNavigationProp } from '@react-navigation/stack';
 import React from 'react';
 import { StyleSheet, Image } from 'react-native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { ThemedView } from '../components/ThemedView';
-import { ThemedText } from '../components/ThemedText';
-import { RootStackParamList } from '../navigation/Navigation';
 
+import logoImage from '../../assets/logo.png'
+import { ThemedText } from '../components/ThemedText';
+import { ThemedView } from '../components/ThemedView';
+import { RootStackParamList } from '../navigation/Navigation';
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 
 interface HomeScreenProps {
   navigation: HomeScreenNavigationProp;
 }
 
-export default function HomeScreen({ navigation }: HomeScreenProps) {
+export default function HomeScreen({ }: HomeScreenProps) {
   return (
     <ThemedView style={styles.container}>      
       <Image 
-        source={require('../../assets/logo.png')} 
+        source={logoImage} 
         style={styles.logo} 
         resizeMode="contain"
       />        
