@@ -1,10 +1,10 @@
-import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { useAppContext } from '../context/AppContext';
+import React from 'react';
 
-import OnboardingScreen from '../screens/OnboardingScreen';
+import { useAppContext } from '../context/AppContext';
 import HomeScreen from '../screens/HomeScreen';
+import OnboardingScreen from '../screens/OnboardingScreen';
 
 export type RootStackParamList = {
   Onboarding: undefined;

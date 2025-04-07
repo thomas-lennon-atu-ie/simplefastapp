@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Animated, Easing } from 'react-native';
 import Svg, { Circle, Text as SvgText } from 'react-native-svg';
+
 import { ThemedText } from './ThemedText';
 
 interface FastProgressCircleProps {
@@ -69,7 +70,7 @@ export function FastProgressCircle({ slideNumber, isVisible }: FastProgressCircl
         useNativeDriver: true,
       }).start();
     }
-  }, [isVisible, slideNumber, progress, previousProgress]);
+  }, [isVisible, slideNumber, progress, previousProgress, animatedProgress]);
   
   const size = 200;
   const strokeWidth = 15;

@@ -3,7 +3,7 @@ import { View, ViewProps, useColorScheme } from 'react-native';
 
 export function ThemedView(props: ViewProps) {
   const colorScheme = useColorScheme() ?? 'light';
-  const { style, ...otherProps } = props;
+  const { style, children } = props;
 
   return (
     <View
@@ -11,7 +11,8 @@ export function ThemedView(props: ViewProps) {
         { backgroundColor: colorScheme === 'dark' ? '#000' : '#fff' },
         style
       ]}
-      {...otherProps}
-    />
+    >
+      {children}
+    </View>
   );
 }

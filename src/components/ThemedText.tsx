@@ -7,7 +7,7 @@ interface ThemedTextProps extends TextProps {
 
 export function ThemedText(props: ThemedTextProps) {
   const colorScheme = useColorScheme() ?? 'light';
-  const { style, type = 'default', ...otherProps } = props;
+  const { style, type = 'default' } = props;
 
   const textStyle = {
     color: colorScheme === 'dark' ? '#fff' : '#000',
@@ -17,7 +17,6 @@ export function ThemedText(props: ThemedTextProps) {
   return (
     <Text
       style={[textStyle, style]}
-      {...otherProps}
     />
   );
 }
