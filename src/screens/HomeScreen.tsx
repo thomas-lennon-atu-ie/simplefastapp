@@ -12,7 +12,7 @@ interface HomeScreenProps {
   navigation: HomeScreenNavigationProp;
 }
 
-export default function HomeScreen({ }: HomeScreenProps) {
+export default function HomeScreen(_props: Readonly<HomeScreenProps>) {
   return (
     <ThemedView style={styles.container}>      
       <Image 

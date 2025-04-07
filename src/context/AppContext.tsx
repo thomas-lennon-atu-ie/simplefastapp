@@ -1,9 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useMemo } from 'react';
 
 type AppContextType = {
   hasCompletedOnboarding: boolean;
-  setOnboardingComplete: () => void;
+  setOnboardingComplete: () => Promise<void>;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -27,21 +27,26 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     checkOnboardingStatus();
   }, []);
 
-  const setOnboardingComplete = async () => {
+  const setOnboardingComplete = React.useCallback(async () => {
     try {
       await AsyncStorage.setItem('hasCompletedOnboarding', 'true');
       setHasCompletedOnboarding(true);
     } catch (error) {
       console.error('Error setting onboarding complete:', error);
     }
-  };
+  }, []);
 
+  const contextValue = useMemo(() => ({
+    hasCompletedOnboarding,
+    setOnboardingComplete
+  }), [hasCompletedOnboarding, setOnboardingComplete]);
+  
   if (isLoading) {
     return null; 
   }
-
+  
   return (
-    <AppContext.Provider value={{ hasCompletedOnboarding, setOnboardingComplete }}>
+    <AppContext.Provider value={contextValue}>
       {children}
     </AppContext.Provider>
   );

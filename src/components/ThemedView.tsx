@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, ViewProps, useColorScheme } from 'react-native';
 
-export function ThemedView(props: ViewProps) {
+export function ThemedView(props: Readonly<ViewProps>) {
   const colorScheme = useColorScheme() ?? 'light';
   const { style, children } = props;
 

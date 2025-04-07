@@ -9,7 +9,7 @@ interface FastProgressCircleProps {
   isVisible: boolean; 
 }
 
-export function FastProgressCircle({ slideNumber, isVisible }: FastProgressCircleProps) {
+export function FastProgressCircle({ slideNumber, isVisible }: Readonly<FastProgressCircleProps>) {
   const animatedProgress = useRef(new Animated.Value(0)).current;
   
   const getPreviousProgress = (currentSlide: number) => {
