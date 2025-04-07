@@ -1,11 +1,13 @@
+import { StackNavigationProp } from '@react-navigation/stack';
 import React, { useState, useRef } from 'react';
 import { StyleSheet, TouchableOpacity, View, FlatList, Dimensions, SafeAreaView, Image } from 'react-native';
-import { StackNavigationProp } from '@react-navigation/stack';
+
+import logoImage from '../../assets/logo.png'
 import { FastProgressCircle } from '../components/FastProgressCircle';
-import { ThemedView } from '../components/ThemedView';
 import { ThemedText } from '../components/ThemedText';
-import { RootStackParamList } from '../navigation/Navigation';
+import { ThemedView } from '../components/ThemedView';
 import { useAppContext } from '../context/AppContext';
+import { RootStackParamList } from '../navigation/Navigation';
 
 type OnboardingScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Onboarding'>;
 
@@ -33,7 +35,7 @@ const onboardingData = [
   },
 ];
 
-export default function OnboardingScreen({ navigation }: OnboardingScreenProps) {
+export default function OnboardingScreen({ }: OnboardingScreenProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const { setOnboardingComplete } = useAppContext();
@@ -53,6 +55,7 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
     console.log("Onboarding completed via context");
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderItem = ({ item, index }: { item: any; index: number }) => {
     return (
       <View style={[styles.slide, { width }]}>
@@ -61,7 +64,7 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
           isVisible={index === currentIndex}  
         />
         <Image 
-          source={require('../../assets/logo.png')} 
+          source={logoImage} 
           style={styles.logo} 
           resizeMode="contain"
         />
