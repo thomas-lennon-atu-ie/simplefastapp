@@ -5,7 +5,7 @@ interface ThemedTextProps extends TextProps {
   type?: 'default' | 'title' | 'subtitle' | 'link';
 }
 
-export function ThemedText(props: ThemedTextProps) {
+export function ThemedText(props: Readonly<ThemedTextProps>) {
   const colorScheme = useColorScheme() ?? 'light';
   const { style, type = 'default' } = props;
 

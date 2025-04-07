@@ -35,7 +35,7 @@ const onboardingData = [
   },
 ];
 
-export default function OnboardingScreen(_props: OnboardingScreenProps) {
+export default function OnboardingScreen(_props: Readonly<OnboardingScreenProps>) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const { setOnboardingComplete } = useAppContext();
@@ -104,23 +104,23 @@ export default function OnboardingScreen(_props: OnboardingScreenProps) {
 
         <ThemedView style={styles.footer}>
           <ThemedView style={styles.paginationContainer}>
-            {onboardingData.map((_, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => {
-                  flatListRef.current?.scrollToIndex({ index, animated: true });
-                  setCurrentIndex(index);
-                }}
-                style={styles.paginationDotTouchable}
-              >
-                <View
-                  style={[
-                    styles.paginationDot,
-                    index === currentIndex ? styles.paginationDotActive : styles.paginationDotInactive
-                  ]}
-                />
-              </TouchableOpacity>
-            ))}
+            {onboardingData.map((item, index) => (
+                          <TouchableOpacity
+                            key={item.id}
+                            onPress={() => {
+                              flatListRef.current?.scrollToIndex({ index, animated: true });
+                              setCurrentIndex(index);
+                            }}
+                            style={styles.paginationDotTouchable}
+                          >
+                            <View
+                              style={[
+                                styles.paginationDot,
+                                index === currentIndex ? styles.paginationDotActive : styles.paginationDotInactive
+                              ]}
+                            />
+                          </TouchableOpacity>
+                        ))}
           </ThemedView>
 
           <ThemedView style={styles.buttonRow}>
