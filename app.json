@@ -30,6 +30,10 @@
         "projectId": "cc4fda45-3e1f-4ec3-a23a-f57bbfc1be34"
       }
     },
-    "owner": "thomaslennon"
+    "owner": "thomaslennon",
+    "runtimeVersion": "1.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/cc4fda45-3e1f-4ec3-a23a-f57bbfc1be34"
+    }
   }
 }

@@ -75,8 +75,8 @@ jobs:
       - name: Deploy to Firebase (dev channel)
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_SIMPLEFAST_4428E }}'
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SIMPLEFAST_4428E }}
           projectId: simplefast-4428e
           channelId: dev
           target: dev
