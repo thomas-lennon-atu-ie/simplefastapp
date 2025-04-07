@@ -35,7 +35,7 @@ const onboardingData = [
   },
 ];
 
-export default function OnboardingScreen({ }: OnboardingScreenProps) {
+export default function OnboardingScreen(_props: OnboardingScreenProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const { setOnboardingComplete } = useAppContext();
