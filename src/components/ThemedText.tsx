@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-props-no-spreading */
 import React from 'react';
 import { Text, TextProps, useColorScheme, TextStyle } from 'react-native';
 
@@ -7,7 +8,7 @@ interface ThemedTextProps extends TextProps {
 
 export function ThemedText(props: Readonly<ThemedTextProps>) {
   const colorScheme = useColorScheme() ?? 'light';
-  const { style, type = 'default' } = props;
+  const { style, type = 'default', ...otherProps } = props;
 
   const textStyle = {
     color: colorScheme === 'dark' ? '#fff' : '#000',
@@ -17,6 +18,7 @@ export function ThemedText(props: Readonly<ThemedTextProps>) {
   return (
     <Text
       style={[textStyle, style]}
+      {...otherProps}
     />
   );
 }
