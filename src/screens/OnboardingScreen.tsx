@@ -52,9 +52,10 @@ export default function OnboardingScreen(_props: Readonly<OnboardingScreenProps>
 
   const completeOnboarding = () => {
     setOnboardingComplete();
-    console.log("Onboarding completed via context");
+    
   };
 
+  
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderItem = ({ item, index }: { item: any; index: number }) => {
     return (
@@ -97,7 +98,7 @@ export default function OnboardingScreen(_props: Readonly<OnboardingScreenProps>
           onMomentumScrollEnd={(event) => {
             const newIndex = Math.round(event.nativeEvent.contentOffset.x / width);
             if (newIndex >= 0 && newIndex < onboardingData.length) {
-                setCurrentIndex(newIndex);
+              setCurrentIndex(newIndex);
             }
           }}
         />
@@ -105,22 +106,22 @@ export default function OnboardingScreen(_props: Readonly<OnboardingScreenProps>
         <ThemedView style={styles.footer}>
           <ThemedView style={styles.paginationContainer}>
             {onboardingData.map((item, index) => (
-                          <TouchableOpacity
-                            key={item.id}
-                            onPress={() => {
-                              flatListRef.current?.scrollToIndex({ index, animated: true });
-                              setCurrentIndex(index);
-                            }}
-                            style={styles.paginationDotTouchable}
-                          >
-                            <View
-                              style={[
-                                styles.paginationDot,
-                                index === currentIndex ? styles.paginationDotActive : styles.paginationDotInactive
-                              ]}
-                            />
-                          </TouchableOpacity>
-                        ))}
+              <TouchableOpacity
+                key={item.id}
+                onPress={() => {
+                  flatListRef.current?.scrollToIndex({ index, animated: true });
+                  setCurrentIndex(index);
+                }}
+                style={styles.paginationDotTouchable}
+              >
+                <View
+                  style={[
+                    styles.paginationDot,
+                    index === currentIndex ? styles.paginationDotActive : styles.paginationDotInactive
+                  ]}
+                />
+              </TouchableOpacity>
+            ))}
           </ThemedView>
 
           <ThemedView style={styles.buttonRow}>

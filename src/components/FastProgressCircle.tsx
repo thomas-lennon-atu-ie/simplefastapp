@@ -57,7 +57,7 @@ export function FastProgressCircle({ slideNumber, isVisible }: Readonly<FastProg
   const { progress, color, emoji, label } = getProgressValues();
   const previousProgress = getPreviousProgress(slideNumber);
   
-  // Trigger animation when slide becomes visible
+  
   useEffect(() => {
     if (isVisible) {
       console.log(`Animating slide ${slideNumber} from ${previousProgress} to ${progress}`);
@@ -67,6 +67,7 @@ export function FastProgressCircle({ slideNumber, isVisible }: Readonly<FastProg
         toValue: progress,
         duration: 1000, 
         easing: Easing.out(Easing.cubic), 
+      
         useNativeDriver: true,
       }).start();
     }
@@ -96,6 +97,7 @@ export function FastProgressCircle({ slideNumber, isVisible }: Readonly<FastProg
           cy={size / 2}
           r={radius}
           strokeWidth={strokeWidth}
+          
         />
         
         {/* Animated Progress Circle */}
@@ -106,10 +108,11 @@ export function FastProgressCircle({ slideNumber, isVisible }: Readonly<FastProg
           cy={size / 2}
           r={radius}
           strokeWidth={strokeWidth}
-          strokeDasharray={circumference}
+          strokeDasharray={`${circumference}`}
           strokeDashoffset={strokeDashoffset}
           strokeLinecap="round"
-          transform={`rotate(-90, ${size/2}, ${size/2})`} 
+          transform={`rotate(-90, ${size/2}, ${size/2})`}
+          
         />
         
         {/* Center Text with Emoji */}
