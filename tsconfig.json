@@ -10,8 +10,10 @@
     "noEmit": true,
     "jsx": "react-native",
     "skipLibCheck": true,
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "../screens/*": ["src/screens/*"]
     }
   },
   "include": [
