@@ -7,9 +7,13 @@ import {
   FIREBASE_APP_ID
 // eslint-disable-next-line import/no-unresolved
 } from '@env';
+// Import AsyncStorage
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage'; 
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+// Import initializeAuth and getReactNativePersistence
+import { getAuth, initializeAuth, getReactNativePersistence } from 'firebase/auth'; 
 import { getFirestore } from 'firebase/firestore';
+import { Platform } from 'react-native';
 
 // web app's Firebase configuration
 const firebaseConfig = {
@@ -21,9 +25,17 @@ const firebaseConfig = {
   appId: FIREBASE_APP_ID
 };
 
-// Initialize Firebase
+
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+
+
+const auth = Platform.OS === 'web' 
+  ? getAuth(app) 
+  : initializeAuth(app, { 
+      persistence: getReactNativePersistence(ReactNativeAsyncStorage)
+    });
+
+export { auth }; 
 export const db = getFirestore(app);
 
 export default app;

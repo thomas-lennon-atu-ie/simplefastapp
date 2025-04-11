@@ -2,8 +2,7 @@ module.exports = function(api) {
   api.cache(true);
   return {
     presets: ['babel-preset-expo'],
-    plugins: [
-      'react-native-reanimated/plugin',
+    plugins: [     
       ['module-resolver', {
         alias: {
           '@': './'
@@ -19,7 +18,8 @@ module.exports = function(api) {
           safe: false,
           allowUndefined: true
         }
-      ]
+      ],
+      'react-native-reanimated/plugin', 
     ],
   };
 };

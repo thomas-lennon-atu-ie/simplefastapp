@@ -6,6 +6,7 @@ import MainTabNavigator from './MainTabNavigator';
 import { useAppContext } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import AuthScreen from '../screens/auth/AuthScreen';
+import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen'; 
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import SignInScreen from '../screens/auth/SignInScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
@@ -15,7 +16,8 @@ export type RootStackParamList = {
   Auth: undefined;
   SignIn: undefined;
   Register: undefined;
-  Home: undefined;
+  ForgotPassword: undefined; 
+  Home: undefined; 
   Main: undefined;
 };
 
@@ -40,13 +42,14 @@ export default function Navigation() {
           <Stack.Screen name="Auth" component={AuthScreen} />
           <Stack.Screen name="SignIn" component={SignInScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
+          <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} /> 
         </>
       );
     }
   };
 
   return (
-    <NavigationContainer>
+    <NavigationContainer>      
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {renderScreens()}
       </Stack.Navigator>

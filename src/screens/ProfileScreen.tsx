@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 
 import { ThemedText } from '../components/ThemedText';
 import { ThemedView } from '../components/ThemedView';
@@ -12,9 +12,9 @@ export default function ProfileScreen() {
     <ThemedView style={styles.container}>
       <ThemedText type="title">Profile</ThemedText>
       <ThemedText style={styles.email}>{user?.email}</ThemedText>
-      <ThemedView style={styles.button} onTouchEnd={logout}>
+      <TouchableOpacity style={styles.button} onPress={logout}>
         <ThemedText style={styles.buttonText}>Log Out</ThemedText>
-      </ThemedView>
+      </TouchableOpacity>
     </ThemedView>
   );
 }
@@ -31,10 +31,13 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: '#0a7ea4',
-    padding: 15,
-    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 25, 
   },
   buttonText: {
     color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
