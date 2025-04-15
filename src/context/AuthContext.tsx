@@ -7,9 +7,9 @@ import {
   signOut,
   GoogleAuthProvider,
   signInWithCredential,
+    // @ts-expect-error - signInWithPopup is web-only and might not be recognized in this environment
   signInWithPopup
 } from 'firebase/auth';
-// Wrap web-specific code in Platform checks
 import React, { createContext, useState, useEffect, useContext, useMemo, useCallback } from 'react';
 import { Platform } from 'react-native';
 
