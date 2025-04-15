@@ -29,7 +29,7 @@ export default function ForgotPasswordScreen({ navigation }: Readonly<ForgotPass
       return;
     }
     
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/; 
     if (!re.test(String(email).toLowerCase())) {
        setEmailError('Please enter a valid email address.');
        return;
