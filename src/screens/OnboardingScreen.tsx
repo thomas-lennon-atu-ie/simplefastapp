@@ -50,9 +50,8 @@ export default function OnboardingScreen(_props: Readonly<OnboardingScreenProps>
     }
   };
 
-  const completeOnboarding = () => {
-    setOnboardingComplete();
-    
+  const completeOnboarding = async () => {
+    await setOnboardingComplete();
   };
 
   

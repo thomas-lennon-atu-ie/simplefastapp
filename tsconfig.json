@@ -10,8 +10,11 @@
     "noEmit": true,
     "jsx": "react-native",
     "skipLibCheck": true,
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "../screens/*": ["src/screens/*"],
+      "@firebase/auth": ["./node_modules/@firebase/auth/dist/index.rn.d.ts"]
     }
   },
   "include": [
