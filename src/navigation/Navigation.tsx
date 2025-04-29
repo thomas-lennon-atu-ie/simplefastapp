@@ -9,6 +9,7 @@ import AuthScreen from '../screens/auth/AuthScreen';
 import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen'; 
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import SignInScreen from '../screens/auth/SignInScreen';
+import FastingStagesScreen from '../screens/FastingStagesScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 
 export type RootStackParamList = {
@@ -19,6 +20,7 @@ export type RootStackParamList = {
   ForgotPassword: undefined; 
   Home: undefined; 
   Main: undefined;
+  FastingStages: { currentElapsedHours?: number };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -43,6 +45,11 @@ export default function Navigation() {
           <Stack.Screen name="SignIn" component={SignInScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} />
           <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} /> 
+          <Stack.Screen 
+            name="FastingStages" 
+            component={FastingStagesScreen} 
+            options={{ headerShown: false }}
+          />
         </>
       );
     }
