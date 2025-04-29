@@ -1,121 +1,189 @@
-import React, { useEffect, useCallback } from 'react';
-import { StyleSheet, Image, TouchableOpacity, Alert, View, Platform, Text } from 'react-native'; 
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing, runOnJS } from 'react-native-reanimated'; 
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { Timestamp } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Dimensions, Image, Alert, View, Text, ActivityIndicator, TouchableOpacity } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
 
 import logoImage from '../../assets/logo.png';
-import { ThemedText } from '../components/ThemedText'; 
+import { AnimatedFastButton } from '../components/AnimatedFastButton';
+import { ConfirmationModal } from '../components/ConfirmationModal';
+import { ThemedText } from '../components/ThemedText';
 import { ThemedView } from '../components/ThemedView';
+import { useFast } from '../context/FastContext';
 
-const AnimatedView = Animated.createAnimatedComponent(View); 
+const AnimatedView = Animated.createAnimatedComponent(View);
 const AnimatedImage = Animated.createAnimatedComponent(Image);
-const AnimatedText = Animated.createAnimatedComponent(Text); 
+const AnimatedText = Animated.createAnimatedComponent(Text);
+
+const formatDuration = (milliseconds: number | null): string => {
+    if (milliseconds === null || milliseconds < 0) return "--:--:--";
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+};
+
+const { width, height } = Dimensions.get('window');
+
+type RootStackParamList = {
+  Home: undefined;
+  FastingStages: { currentElapsedHours: number };
+};
+
+type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
 export default function HomeScreen() {
- 
-  const finalLogoY = -180; 
-  const logoY = useSharedValue(0);
-  const initialTaglineOpacity = useSharedValue(1); 
-  const finalTaglineOpacity = useSharedValue(0); 
-  const circleScale = useSharedValue(0);
+  const navigation = useNavigation<HomeScreenNavigationProp>();
+  const { fastState, startFast, endFast, loading: contextLoading, lastFastDuration } = useFast();
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [isEndFastModalVisible, setIsEndFastModalVisible] = useState(false);
 
-  const startCircleAnimation = useCallback(() => {
-    circleScale.value = withTiming(1, { duration: 600, easing: Easing.out(Easing.back(1.5)) });
-  }, [circleScale]); 
+  const finalLogoY = 50;
+  const logoY = useSharedValue(0);
+  const initialTaglineOpacity = useSharedValue(1);
+  const finalTaglineOpacity = useSharedValue(0);
+  
+  useEffect(() => {
+    if (!contextLoading) {
+        const onFadeOutComplete = (finished?: boolean) => {
+            if (finished) {
+                finalTaglineOpacity.value = withTiming(1, { duration: 300 });
+            }
+        };
+        const startAnimation = () => {
+            logoY.value = withTiming(finalLogoY, { duration: 800, easing: Easing.out(Easing.exp) },
+                (finished?: boolean) => {
+                    if (finished) {
+                        initialTaglineOpacity.value = withTiming(0, { duration: 800 }, onFadeOutComplete);
+                    }
+                }
+            );
+        };
+
+        if (!fastState.isActive) {
+             startAnimation();
+        } else {
+             logoY.value = finalLogoY;
+             initialTaglineOpacity.value = 0;
+             finalTaglineOpacity.value = 1;
+        }
+    }
+  }, [contextLoading, fastState.isActive, logoY, initialTaglineOpacity, finalTaglineOpacity, finalLogoY]);
 
   useEffect(() => {
-    const onFadeOutComplete = (finished?: boolean) => {
-      if (finished) {       
-       
-        finalTaglineOpacity.value = withTiming(1, { duration: 300 }); 
-        
-        runOnJS(startCircleAnimation)();
-      }
-    };
+    let intervalId: NodeJS.Timeout | null = null;
+    if (fastState.isActive && fastState.startTime instanceof Timestamp) {
+      const initialElapsed = Date.now() - fastState.startTime.toMillis();
+      setElapsedTime(initialElapsed > 0 ? initialElapsed : 0);
 
-    const startAnimation = () => {      
-   
-      logoY.value = withTiming(finalLogoY, { duration: 800, easing: Easing.out(Easing.exp) },         
-        (finished?: boolean) => {
-          
-          if (finished) {            
-            initialTaglineOpacity.value = withTiming(0, { duration: 800 }, onFadeOutComplete); 
-          }
+      intervalId = setInterval(() => {
+        if (fastState.startTime instanceof Timestamp) {
+           const currentElapsed = Date.now() - fastState.startTime.toMillis();
+           setElapsedTime(currentElapsed > 0 ? currentElapsed : 0);
         }
-      );
+      }, 1000);
+
+    } else {
+      setElapsedTime(0);
+    }
+    return () => {
+      if (intervalId) clearInterval(intervalId);
     };
+  }, [fastState.isActive, fastState.startTime]);
 
-    startAnimation();
 
-  }, [logoY, initialTaglineOpacity, finalTaglineOpacity, circleScale, startCircleAnimation, finalLogoY]); 
-
- 
-  const logoContainerAnimatedStyle = useAnimatedStyle(() => {
-   
-    return {
-      transform: [{ translateY: logoY.value }],
-    };
-  });
-
-  const initialTaglineAnimatedStyle = useAnimatedStyle(() => {
-   
-    return {
-      opacity: initialTaglineOpacity.value,
-    };
-  });
-
-  const finalTaglineAnimatedStyle = useAnimatedStyle(() => {
-   
-    return {
-      opacity: finalTaglineOpacity.value,
-    };
-  });
-
-  const circleAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: circleScale.value }],
-      opacity: circleScale.value, 
-    };
-  });
-
+  const logoContainerAnimatedStyle = useAnimatedStyle(() => ({ transform: [{ translateY: logoY.value }] }));
+  const initialTaglineAnimatedStyle = useAnimatedStyle(() => ({ opacity: initialTaglineOpacity.value }));
+  const finalTaglineAnimatedStyle = useAnimatedStyle(() => ({ opacity: finalTaglineOpacity.value }));
 
   const handleStartFasting = () => {
-    Alert.alert("Start Fasting", "Functionality coming soon!");
+    startFast();
   };
 
+  const performEndFast = async () => {
+    console.log("[HomeScreen] performEndFast called");
+    setIsEndFastModalVisible(false);
+    try {
+        await endFast();
+        console.log("[HomeScreen] endFast() call completed.");
+    } catch (error) {
+      console.error("[HomeScreen] Error caught after calling endFast:", error);
+      Alert.alert('Error Ending Fast', 'Could not update fast status. Please check logs or try again.');
+    }
+  };
+
+  const handleEndFasting = () => {
+    console.log("[HomeScreen] handleEndFasting called - showing modal");
+    setIsEndFastModalVisible(true);
+  };
+
+  const handleViewStages = () => {
+    navigation.navigate('FastingStages', { 
+      currentElapsedHours: elapsedTime / (1000 * 60 * 60) 
+    });
+  };
+  
+  if (contextLoading) {
+      return <ThemedView style={styles.container}><ActivityIndicator size="large" color="#0a7ea4" /></ThemedView>;
+  }
+
   return (
-    <ThemedView style={styles.container}>      
-
+    <ThemedView style={styles.container}>
       <AnimatedView style={[styles.logoTaglineContainer, logoContainerAnimatedStyle]}>
-        <AnimatedImage
-          source={logoImage}
-          style={styles.logo}
-          resizeMode="contain"
-        />  
-       
-        <View style={styles.taglinesWrapper}>
-      
-            <AnimatedText 
-              style={[styles.taglineBase, styles.taglineInitial, initialTaglineAnimatedStyle]}
-              numberOfLines={1} 
-            >
-                Your Simple Fasting Assistant
-            </AnimatedText>
-    
-            <AnimatedText 
-              style={[styles.taglineBase, styles.taglineFinal, styles.taglineHighlight, finalTaglineAnimatedStyle]}
-              numberOfLines={1} 
-            >
-                Simple Fast
-            </AnimatedText>
-        </View>
-      </AnimatedView>     
+         <AnimatedImage source={logoImage} style={styles.logo} resizeMode="contain" />
+         <View style={styles.taglinesWrapper}>
+           <AnimatedText style={[styles.taglineBase, styles.taglineInitial, initialTaglineAnimatedStyle]} numberOfLines={1}>
+             Your Simple Fasting Assistant
+           </AnimatedText>
+           <AnimatedText style={[styles.taglineBase, styles.taglineFinal, styles.taglineHighlight, finalTaglineAnimatedStyle]} numberOfLines={1}>
+             Simple Fast
+           </AnimatedText>
+         </View>
+      </AnimatedView>
 
-   
-      <Animated.View style={[styles.circleContainer, circleAnimatedStyle]}>
-        <TouchableOpacity style={styles.circleButton} onPress={handleStartFasting}>
-          <ThemedText style={styles.buttonText}>Start fasting!</ThemedText>
-        </TouchableOpacity>
-      </Animated.View>
+      <View style={styles.buttonContainer}>
+        <AnimatedFastButton
+            isActive={fastState.isActive}
+            elapsedTime={elapsedTime}
+            targetDuration={fastState.targetDuration}
+            onStartPress={handleStartFasting}
+            onEndPress={() => {}} 
+            onViewStagesPress={handleViewStages}
+            size={Math.min(width * 0.5, 200)}
+        />
+        
+        
+        {fastState.isActive && (
+          <TouchableOpacity
+            style={styles.endFastButton}
+            onPress={handleEndFasting}
+          >
+            <ThemedText style={styles.endFastButtonText}>End Fast</ThemedText>
+          </TouchableOpacity>
+        )}
+        
+        {!fastState.isActive && lastFastDuration !== null && (
+          <ThemedText style={styles.lastDurationText}>
+            Last fast: {formatDuration(lastFastDuration)}
+          </ThemedText>
+        )}
+      </View>
+
+
+      <ConfirmationModal
+        visible={isEndFastModalVisible}
+        title="End Fast"
+        message="Are you sure you want to end your current fast?"
+        confirmText="End Fast"
+        cancelText="Cancel"
+        onConfirm={performEndFast}
+        onCancel={() => {
+          console.log("[HomeScreen] Modal Cancel pressed");
+          setIsEndFastModalVisible(false);
+        }}
+      />
     </ThemedView>
   );
 }
@@ -124,75 +192,62 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center', 
+    justifyContent: 'space-between', 
     padding: 20,
+    paddingTop: height * 0.15, 
+    paddingBottom: height * 0.1, 
   },
   logoTaglineContainer: {
-    alignItems: 'center', 
+    alignItems: 'center',
     position: 'absolute', 
+    top: height * 0.08, 
+    left: 0,
+    right: 0,
   },
-  logo: {
-    width: 120,
-    height: 120,
-    marginBottom: 10, 
+  logo: { 
+    width: Math.min(width * 0.25, 120), 
+    height: Math.min(width * 0.25, 120),
+    marginBottom: 10 
   },
- 
   taglinesWrapper: {
     alignItems: 'center', 
     justifyContent: 'center', 
-    width: 300, 
-    height: 30, 
-  },
-  
-  taglineBase: {
-    fontSize: 16,    
-    color: '#555', 
-    textAlign: 'center',
-    
-    position: 'absolute', 
-    
     width: '100%', 
-   
-    top: 0,
-    left: 0,
+    height: 30
   },
- 
-  taglineInitial: {
-     
-  },
-
-  taglineFinal: {
-    
-  },
-
-  taglineHighlight: {
-    fontWeight: 'bold',
-  },
-  
-  circleContainer: {
-    position: 'absolute', 
-  },
-  circleButton: {
-    width: 200,
-    height: 200,
-    borderRadius: 100,
-    backgroundColor: '#0a7ea4', 
+  taglineBase: { fontSize: 16, color: '#555', textAlign: 'center', position: 'absolute', width: '100%', top: 0, left: 0 },
+  taglineInitial: {},
+  taglineFinal: {},
+  taglineHighlight: { fontWeight: 'bold' },
+  buttonContainer: {
+    flex: 1, 
     justifyContent: 'center',
     alignItems: 'center',
-    ...Platform.select({
-      web: { boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.25)' },
-      default: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-      }
-    })
+    width: '100%',
   },
-  buttonText: {
+  lastDurationText: {
+    marginTop: 25,
+    fontSize: 14,
+    color: '#555',
+    opacity: 0.8,
+    textAlign: 'center',
+  },
+  endFastButton: {
+    marginTop: 20,
+    backgroundColor: '#FF5722',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  endFastButtonText: {
     color: 'white',
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 16,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });
