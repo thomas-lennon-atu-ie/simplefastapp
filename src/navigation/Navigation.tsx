@@ -1,5 +1,6 @@
 import { NavigationContainer } from '@react-navigation/native';
 import React from 'react';
+import { Animated } from 'react-native'; 
 import { createSharedElementStackNavigator } from 'react-navigation-shared-element';
 
 import MainTabNavigator from './MainTabNavigator';
@@ -51,9 +52,11 @@ export default function Navigation() {
                 open: { animation: 'timing', config: { duration: 400 } },
                 close: { animation: 'timing', config: { duration: 400 } },
               },
-              cardStyleInterpolator: ({ current: { progress } }) => ({
+              cardStyleInterpolator: ({ current }: { 
+                current: { progress: Animated.AnimatedInterpolation<number> } 
+              }) => ({
                 cardStyle: {
-                  opacity: progress,
+                  opacity: current.progress,
                 },
               }),
             }}
