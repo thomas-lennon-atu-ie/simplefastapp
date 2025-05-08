@@ -34,7 +34,7 @@ type FastContextType = {
   fastHistory: CompletedFast[];
   lastFastDuration: number | null;
   startFast: (startTime?: number, duration?: number) => Promise<void>;
-  endFast: () => Promise<void>;
+  endFast: (endTime?: number) => Promise<void>;
   loading: boolean;
 };
 
@@ -144,7 +144,7 @@ export const FastProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [userId, authLoading]);
 
-  const endFast = useCallback(async () => {
+  const endFast = useCallback(async (customEndTime?: number) => {
  
     if (authLoading) { 
       return; 
@@ -158,7 +158,7 @@ export const FastProvider = ({ children }: { children: React.ReactNode }) => {
       return; 
     }
 
-    const endTime = Timestamp.now();
+    const endTime = customEndTime ? Timestamp.fromMillis(customEndTime) : Timestamp.now();
     const duration = endTime.toMillis() - fastState.startTime.toMillis();
 
     const completedFast: CompletedFast = {

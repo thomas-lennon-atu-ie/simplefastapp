@@ -1,13 +1,16 @@
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Timestamp } from 'firebase/firestore';
+import LottieView from 'lottie-react-native';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Dimensions, Image, Alert, View, Text, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { StyleSheet, Dimensions, Image, Alert, View, Text, ActivityIndicator, TouchableOpacity, Platform } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
 
 import logoImage from '../../assets/logo.png';
+import fireworksLottie from '../../assets/lottie/fireworks.json';
 import { AnimatedFastButton } from '../components/AnimatedFastButton';
 import { ConfirmationModal } from '../components/ConfirmationModal';
+import { DateTimePickerModal } from '../components/DateTimePickerModal';
 import { ThemedText } from '../components/ThemedText';
 import { ThemedView } from '../components/ThemedView';
 import { useFast } from '../context/FastContext';
@@ -39,6 +42,11 @@ export default function HomeScreen() {
   const { fastState, startFast, endFast, loading: contextLoading, lastFastDuration } = useFast();
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isEndFastModalVisible, setIsEndFastModalVisible] = useState(false);
+  const [isStartPickerVisible, setStartPickerVisible] = useState(false);
+  const [isEndPickerVisible, setEndPickerVisible] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'start' | 'end' | null>(null);
+  const [pickerValue, setPickerValue] = useState<Date>(new Date());
+  const [showFireworks, setShowFireworks] = useState(false);
 
   const finalLogoY = 50;
   const logoY = useSharedValue(0);
@@ -99,7 +107,9 @@ export default function HomeScreen() {
   const finalTaglineAnimatedStyle = useAnimatedStyle(() => ({ opacity: finalTaglineOpacity.value }));
 
   const handleStartFasting = () => {
-    startFast();
+    setPickerValue(new Date());
+    setPendingAction('start');
+    setStartPickerVisible(true);
   };
 
   const performEndFast = async () => {
@@ -115,8 +125,28 @@ export default function HomeScreen() {
   };
 
   const handleEndFasting = () => {
-    console.log("[HomeScreen] handleEndFasting called - showing modal");
-    setIsEndFastModalVisible(true);
+    setPickerValue(new Date());
+    setPendingAction('end');
+    setEndPickerVisible(true);
+  };
+
+  const handlePickerConfirm = async (date: Date) => {
+    if (pendingAction === 'start') {
+      await startFast(date.getTime());
+      setStartPickerVisible(false);
+    } else if (pendingAction === 'end') {
+      await endFast(date.getTime());
+      setEndPickerVisible(false);
+      setShowFireworks(true);
+      setTimeout(() => setShowFireworks(false), 2500); 
+    }
+    setPendingAction(null);
+  };
+
+  const handlePickerCancel = () => {
+    setStartPickerVisible(false);
+    setEndPickerVisible(false);
+    setPendingAction(null);
   };
 
   const handleViewStages = () => {
@@ -149,7 +179,7 @@ export default function HomeScreen() {
             elapsedTime={elapsedTime}
             targetDuration={fastState.targetDuration}
             onStartPress={handleStartFasting}
-            onEndPress={() => {}} 
+            onEndPress={handleEndFasting}
             onViewStagesPress={handleViewStages}
             size={Math.min(width * 0.5, 200)}
         />
@@ -184,6 +214,65 @@ export default function HomeScreen() {
           setIsEndFastModalVisible(false);
         }}
       />
+
+      <DateTimePickerModal
+        visible={isStartPickerVisible}
+        value={pickerValue}
+        onChange={handlePickerConfirm}
+        onCancel={handlePickerCancel}
+        maxDate={fastState.isActive && fastState.startTime ? fastState.startTime.toDate() : new Date()}
+        title="Select Start date/time"
+      />
+      <DateTimePickerModal
+        visible={isEndPickerVisible}
+        value={pickerValue}
+        onChange={handlePickerConfirm}
+        onCancel={handlePickerCancel}
+        minDate={fastState.startTime ? fastState.startTime.toDate() : undefined}
+        maxDate={new Date()}
+        title="Select End date/time"
+      />
+
+      {showFireworks && (
+  <View
+    pointerEvents="none"
+    style={{
+      position: 'absolute',
+      left: 0, top: 0, right: 0, bottom: 0,
+      zIndex: 9999,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'transparent',
+    }}
+  >
+    <LottieView
+      source={fireworksLottie}
+      autoPlay
+      loop={false}
+      style={{ width: 300, height: 300 }}
+      resizeMode="cover"
+    />
+  </View>
+)}
+
+      {showFireworks && Platform.OS !== 'web' && (
+        <LottieView
+          source={fireworksLottie}
+          autoPlay
+          loop={false}
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+            width: '100%',
+            height: '100%',
+            zIndex: 9999,
+          }}
+          onAnimationFinish={() => setShowFireworks(false)}
+        />
+      )}
     </ThemedView>
   );
 }
@@ -192,10 +281,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'space-between', 
+    justifyContent: 'space-between',
     padding: 20,
-    paddingTop: height * 0.15, 
-    paddingBottom: height * 0.1, 
+    paddingTop: height * 0.15,
+    paddingBottom: height * 0.1,
+    position: 'relative', 
   },
   logoTaglineContainer: {
     alignItems: 'center',
