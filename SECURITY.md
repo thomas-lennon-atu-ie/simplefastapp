@@ -5,7 +5,7 @@
 The following versions of the SimpleFast application will be receiving security updates:
 
 | Version | Supported          |
-| ------- | ------------------ |
+|---------|--------------------|
 | 2.x.x   | :white_check_mark: |
 | 1.1.x   | :white_check_mark: |
 | 0.x.x   | :x:                |
