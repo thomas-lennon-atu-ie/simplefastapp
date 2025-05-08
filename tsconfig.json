@@ -25,11 +25,12 @@
     "src",
     "App.tsx",
     "index.ts",
-    "src/types/svg.d.ts"
+    "src/types/svg.d.ts",
+    "env.d.ts",
   ],
   "exclude": [
     "node_modules",
     "babel.config.js",
-    "metro.config.js"
+    "metro.config.cjs"
   ]
 }
