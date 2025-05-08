@@ -2,7 +2,7 @@
   "expo": {
     "name": "SimpleFastApp",
     "slug": "simplefast",
-    "version": "0.0.4",
+    "version": "0.0.6",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -31,7 +31,7 @@
       }
     },
     "owner": "thomaslennon",
-    "runtimeVersion": "0.0.4",
+    "runtimeVersion": "0.0.6",
     "updates": {
       "url": "https://u.expo.dev/cc4fda45-3e1f-4ec3-a23a-f57bbfc1be34"
     }

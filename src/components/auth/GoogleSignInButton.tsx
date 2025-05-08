@@ -1,7 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
+import GoogleIcon from '../../../assets/icons/google.svg';
 import { ThemedText } from '../ThemedText'; 
 
 interface GoogleSignInButtonProps {
@@ -20,10 +20,10 @@ export function GoogleSignInButton({ onPress, loading = false, disabled = false 
       disabled={isDisabled}
     >
       {loading ? (
-        <ActivityIndicator color="#0a7ea4" /> 
+        <ActivityIndicator color="#0a7ea4" />
       ) : (
         <>
-          <Icon name="google" size={20} color="#4285F4" style={styles.googleIcon} />
+          <GoogleIcon width={20} height={20} style={styles.googleIcon} />
           <ThemedText style={styles.googleButtonText}>Continue with Google</ThemedText>
         </>
       )}
@@ -48,7 +48,6 @@ const styles = StyleSheet.create({
   },
   googleButtonText: {
     fontSize: 16,
-    
   },
   buttonDisabled: {
     opacity: 0.6,

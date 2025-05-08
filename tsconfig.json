@@ -15,12 +15,17 @@
       "@/*": ["./src/*"],
       "../screens/*": ["src/screens/*"],
       "@firebase/auth": ["./node_modules/@firebase/auth/dist/index.rn.d.ts"]
-    }
+    },
+    "typeRoots": [
+      "./src/types",
+      "./node_modules/@types"
+    ]
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    ".eslintrc.js"
+    "src",
+    "App.tsx",
+    "index.ts",
+    "src/types/svg.d.ts"
   ],
   "exclude": [
     "node_modules",
