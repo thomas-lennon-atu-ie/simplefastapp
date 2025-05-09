@@ -14,7 +14,7 @@
     "build:android:dev": "eas build --platform android --profile development --non-interactive --no-wait",
     "build:android:staging": "eas build --platform android --profile preview --non-interactive --no-wait",
     "build:android:prod": "eas build --platform android --profile production --non-interactive",
-    "postinstall": "npm install --legacy-peer-deps"
+    "postinstall": "echo 'Postinstall completed' || true"
   },
   "dependencies": {
     "@expo/metro-runtime": "~5.0.4",
@@ -75,5 +75,10 @@
     "typescript": "^5.3.3",
     "typescript-eslint": "^8.29.0"
   },
-  "private": true
+  "private": true,
+  "overrides": {
+    "@lottiefiles/dotlottie-react": {
+      "react": "$react"
+    }
+  }
 }
