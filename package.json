@@ -1,6 +1,6 @@
 {
   "name": "simplefastapp",
-  "version": "1.0.0",
+  "version": "0.0.7",
   "main": "index.ts",
   "type": "module",
   "scripts": {

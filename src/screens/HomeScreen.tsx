@@ -39,7 +39,14 @@ type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'H
 
 export default function HomeScreen() {
   const navigation = useNavigation<HomeScreenNavigationProp>();
-  const { fastState, startFast, endFast, loading: contextLoading, lastFastDuration } = useFast();
+  const { 
+    fastState, 
+    startFast, 
+    endFast, 
+    lastFastDuration, 
+    currentGoal, 
+    loading: contextLoading  
+  } = useFast();
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isEndFastModalVisible, setIsEndFastModalVisible] = useState(false);
   const [isStartPickerVisible, setStartPickerVisible] = useState(false);
@@ -48,7 +55,7 @@ export default function HomeScreen() {
   const [pickerValue, setPickerValue] = useState<Date>(new Date());
   const [showFireworks, setShowFireworks] = useState(false);
 
-  const finalLogoY = 50;
+  const finalLogoY = Math.min(height * 1.35, 120); 
   const logoY = useSharedValue(0);
   const initialTaglineOpacity = useSharedValue(1);
   const finalTaglineOpacity = useSharedValue(0);
@@ -78,7 +85,7 @@ export default function HomeScreen() {
              finalTaglineOpacity.value = 1;
         }
     }
-  }, [contextLoading, fastState.isActive, logoY, initialTaglineOpacity, finalTaglineOpacity, finalLogoY]);
+  }, [fastState.isActive, logoY, initialTaglineOpacity, finalTaglineOpacity, finalLogoY, contextLoading]);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout | null = null;
@@ -161,20 +168,24 @@ export default function HomeScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <AnimatedView style={[styles.logoTaglineContainer, logoContainerAnimatedStyle]}>
-         <AnimatedImage source={logoImage} style={styles.logo} resizeMode="contain" />
-         <View style={styles.taglinesWrapper}>
-           <AnimatedText style={[styles.taglineBase, styles.taglineInitial, initialTaglineAnimatedStyle]} numberOfLines={1}>
-             Your Simple Fasting Assistant
-           </AnimatedText>
-           <AnimatedText style={[styles.taglineBase, styles.taglineFinal, styles.taglineHighlight, finalTaglineAnimatedStyle]} numberOfLines={1}>
-             Simple Fast
-           </AnimatedText>
-         </View>
-      </AnimatedView>
-
-      <View style={styles.buttonContainer}>
-        <AnimatedFastButton
+      {/* Create a flex container with proper spacing */}
+      <View style={styles.contentWrapper}>
+        {/* Logo container with fixed zIndex */}
+        <AnimatedView style={[styles.logoTaglineContainer, logoContainerAnimatedStyle, { zIndex: 10 }]}>
+          <AnimatedImage source={logoImage} style={styles.logo} resizeMode="contain" />
+          <View style={styles.taglinesWrapper}>
+            <AnimatedText style={[styles.taglineBase, styles.taglineInitial, initialTaglineAnimatedStyle]} numberOfLines={1}>
+              Your Simple Fasting Assistant
+            </AnimatedText>
+            <AnimatedText style={[styles.taglineBase, styles.taglineFinal, styles.taglineHighlight, finalTaglineAnimatedStyle]} numberOfLines={1}>
+              Simple Fast
+            </AnimatedText>
+          </View>
+        </AnimatedView>
+        
+        {/* Button container that takes remaining space */}
+        <View style={styles.buttonContainer}>
+          <AnimatedFastButton
             isActive={fastState.isActive}
             elapsedTime={elapsedTime}
             targetDuration={fastState.targetDuration}
@@ -182,23 +193,41 @@ export default function HomeScreen() {
             onEndPress={handleEndFasting}
             onViewStagesPress={handleViewStages}
             size={Math.min(width * 0.5, 200)}
-        />
-        
-        
-        {fastState.isActive && (
-          <TouchableOpacity
-            style={styles.endFastButton}
-            onPress={handleEndFasting}
-          >
-            <ThemedText style={styles.endFastButtonText}>End Fast</ThemedText>
-          </TouchableOpacity>
-        )}
-        
-        {!fastState.isActive && lastFastDuration !== null && (
-          <ThemedText style={styles.lastDurationText}>
-            Last fast: {formatDuration(lastFastDuration)}
-          </ThemedText>
-        )}
+            goalDuration={currentGoal?.duration} 
+          />
+          
+          
+          {fastState.isActive && (
+            <TouchableOpacity
+              style={styles.endFastButton}
+              onPress={handleEndFasting}
+            >
+              <ThemedText style={styles.endFastButtonText}>End Fast</ThemedText>
+            </TouchableOpacity>
+          )}
+          
+          {/* When showing last fast duration, add goal comparison */}
+          {!fastState.isActive && lastFastDuration !== null && (
+            <View style={styles.lastFastContainer}>
+              <ThemedText style={styles.lastDurationText}>
+                Last fast: {formatDuration(lastFastDuration)}
+              </ThemedText>
+              
+              {currentGoal && (
+                <ThemedText style={[
+                  styles.goalComparisonText,
+                  lastFastDuration >= (currentGoal.duration) 
+                    ? styles.goalMetText 
+                    : styles.goalNotMetText
+                ]}>
+                  {lastFastDuration >= (currentGoal.duration) 
+                    ? `Goal met! (${(currentGoal.duration / (1000 * 60 * 60)).toFixed(0)}h ${currentGoal.name})` 
+                    : `Goal: ${(currentGoal.duration / (1000 * 60 * 60)).toFixed(0)}h not reached`}
+                </ThemedText>
+              )}
+            </View>
+          )}
+        </View>
       </View>
 
 
@@ -280,24 +309,26 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
+    paddingTop: Platform.OS === 'ios' ? 50 : 30,
+    paddingBottom: 20,
+  },
+  contentWrapper: {
+    flex: 1,
     justifyContent: 'space-between',
-    padding: 20,
-    paddingTop: height * 0.15,
-    paddingBottom: height * 0.1,
-    position: 'relative', 
+    alignItems: 'center',
+    paddingHorizontal: 16,
   },
   logoTaglineContainer: {
     alignItems: 'center',
-    position: 'absolute', 
-    top: height * 0.08, 
-    left: 0,
-    right: 0,
+    marginTop: 10,
+    marginBottom: Platform.OS === 'ios' ? '5%' : '2%', 
+    height: Math.min(height * 0.15, 100), 
+    zIndex: 10, 
   },
-  logo: { 
-    width: Math.min(width * 0.25, 120), 
-    height: Math.min(width * 0.25, 120),
-    marginBottom: 10 
+  logo: {
+    width: Math.min(width * 0.4, 150),
+    height: Math.min(width * 0.15, 150), 
+    resizeMode: 'contain',
   },
   taglinesWrapper: {
     alignItems: 'center', 
@@ -310,17 +341,32 @@ const styles = StyleSheet.create({
   taglineFinal: {},
   taglineHighlight: { fontWeight: 'bold' },
   buttonContainer: {
-    flex: 1, 
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    width: '100%',
+    paddingTop: '5%', 
+    maxHeight: height * 0.7, 
+  },
+  lastFastContainer: {
+    alignItems: 'center',
   },
   lastDurationText: {
-    marginTop: 25,
     fontSize: 14,
     color: '#555',
     opacity: 0.8,
     textAlign: 'center',
+  },
+  goalComparisonText: {
+    marginTop: 4,
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  goalMetText: {
+    color: '#4CAF50',
+    fontWeight: 'bold',
+  },
+  goalNotMetText: {
+    color: '#FFC107',
   },
   endFastButton: {
     marginTop: 20,
