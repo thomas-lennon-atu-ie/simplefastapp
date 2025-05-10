@@ -29,6 +29,52 @@ export interface CompletedFast {
   targetDuration: number | null;
 }
 
+export interface FastingGoal {
+  type: 'preset' | 'custom';
+  name: string;         
+  duration: number;      
+  description?: string;  
+}
+
+export const FASTING_GOAL_PRESETS: FastingGoal[] = [
+  { 
+    type: 'preset', 
+    name: '16:8 (Leangains)',
+    duration: 16 * 60 * 60 * 1000, 
+    description: 'Fast for 16 hours, eat during 8-hour window'
+  },
+  { 
+    type: 'preset', 
+    name: '18:6',
+    duration: 18 * 60 * 60 * 1000, 
+    description: 'Fast for 18 hours, eat during 6-hour window'
+  },
+  { 
+    type: 'preset', 
+    name: '20:4 (Warrior)',
+    duration: 20 * 60 * 60 * 1000, 
+    description: 'Fast for 20 hours, eat during 4-hour window'
+  },
+  { 
+    type: 'preset', 
+    name: '24-Hour Fast',
+    duration: 24 * 60 * 60 * 1000, 
+    description: 'Complete 24-hour fast'
+  },
+  { 
+    type: 'preset', 
+    name: 'OMAD (One Meal a Day)',
+    duration: 23 * 60 * 60 * 1000, 
+    description: 'Fast for 23 hours, eat one meal'
+  },
+  { 
+    type: 'preset', 
+    name: '48-Hour Fast',
+    duration: 48 * 60 * 60 * 1000, 
+    description: 'Complete 48-hour fast' 
+  }
+];
+
 type FastContextType = {
   fastState: FastState;
   fastHistory: CompletedFast[];
@@ -36,6 +82,9 @@ type FastContextType = {
   startFast: (startTime?: number, duration?: number) => Promise<void>;
   endFast: (endTime?: number) => Promise<void>;
   loading: boolean;
+  
+  currentGoal: FastingGoal | null;
+  setFastingGoal: (goal: FastingGoal) => Promise<void>;
 };
 
 const DEFAULT_FAST_DURATION = 16 * 60 * 60 * 1000;
@@ -52,6 +101,7 @@ export const FastProvider = ({ children }: { children: React.ReactNode }) => {
 
   const [fastState, setFastState] = useState<FastState>({ isActive: false, startTime: null, targetDuration: null });
   const [fastHistory, setFastHistory] = useState<CompletedFast[]>([]);
+  const [currentGoal, setCurrentGoal] = useState<FastingGoal | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -112,10 +162,23 @@ export const FastProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     });
 
+    const userGoalRef = doc(db, USERS_COLLECTION, userId, 'settings', 'fastingGoal');
+    
+    const unsubscribeGoal = onSnapshot(userGoalRef, (docSnap) => {
+      if (docSnap.exists()) {
+        setCurrentGoal(docSnap.data() as FastingGoal);
+      } else {
+        // Default to the 16:8 goal if none is set
+        setCurrentGoal(FASTING_GOAL_PRESETS[0]);
+      }
+    }, (error) => {
+      console.error("Error loading fasting goal:", error);
+    });
+    
     return () => {
-      
       unsubscribeActiveFast();
       unsubscribeHistory();
+      unsubscribeGoal();
     };
 
   }, [userId, authLoading]);
@@ -187,6 +250,19 @@ export const FastProvider = ({ children }: { children: React.ReactNode }) => {
   
   }, [userId, fastState, authLoading, setFastState]);
 
+  const setFastingGoal = useCallback(async (goal: FastingGoal) => {
+    if (authLoading || !userId) return;
+    
+    try {
+      const userGoalRef = doc(db, USERS_COLLECTION, userId, 'settings', 'fastingGoal');
+      await setDoc(userGoalRef, goal);
+      setCurrentGoal(goal);
+    } catch (error) {
+      console.error("Error saving fasting goal:", error);
+      throw error;
+    }
+  }, [userId, authLoading]);
+
   const lastFastDuration = useMemo(() => {
     const duration = fastHistory.length > 0 ? fastHistory[fastHistory.length - 1].duration : null;
     return duration;
@@ -199,9 +275,11 @@ export const FastProvider = ({ children }: { children: React.ReactNode }) => {
       lastFastDuration,
       startFast,
       endFast,
-      loading: loading || authLoading
+      loading: loading || authLoading,
+      currentGoal,
+      setFastingGoal
     };
-  }, [fastState, fastHistory, lastFastDuration, startFast, endFast, loading, authLoading]);
+  }, [fastState, fastHistory, lastFastDuration, startFast, endFast, loading, authLoading, currentGoal, setFastingGoal]);
 
   return (
     <FastContext.Provider value={contextValue}>
