@@ -3,15 +3,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import LottieView from 'lottie-react-native';
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Pressable, Platform } from 'react-native';
-import Animated, {
+import Animated,
+{
   useSharedValue,
-  useAnimatedStyle,
-  useAnimatedProps,
   withTiming,
   withSpring,
-  interpolate,
 } from 'react-native-reanimated';
-import Svg, { Circle, G } from 'react-native-svg';
+import Svg, { Circle, Text as SvgText } from 'react-native-svg';
 
 import { ThemedText } from './ThemedText';
 import deepKetosisLottie from '../../assets/lottie/deep-ketosis.json';
@@ -40,7 +38,6 @@ const fastingStages: FastingStage[] = [
 ];
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
-const AnimatedG = Animated.createAnimatedComponent(G);
 
 interface AnimatedFastButtonProps {
   isActive: boolean;
@@ -51,10 +48,11 @@ interface AnimatedFastButtonProps {
   size?: number;
   gradient?: readonly [string, string, ...string[]];
   onViewStagesPress?: () => void;
+  goalDuration?: number | null; 
 }
 
 const DEFAULT_GRADIENT = ['#0a7ea4', '#0a7ea4'] as const;
-const ACTIVE_GRADIENT = ['#FFC107', '#FF9800'] as const;
+
 const defaultButtonSize = 200;
 
 interface IconItemProps {
@@ -90,23 +88,19 @@ const IconItem: React.FC<IconItemProps> = ({
   const x = size / 2 + (iconRadius * radiusMultiplier) * Math.cos(angle);
   const y = size / 2 + (iconRadius * radiusMultiplier) * Math.sin(angle);
 
-
   let dynamicIconSize: number;
   let dynamicOpacity: number;
 
   if (isCurrentActiveStage) {
-    dynamicIconSize = iconSize; 
+    dynamicIconSize = iconSize * 1.2; 
     dynamicOpacity = 1; 
   } else if (isStageMet) {
-    dynamicIconSize = iconSize * 0.8; 
-    dynamicOpacity = 0.7;
+    dynamicIconSize = iconSize; 
+    dynamicOpacity = 0.8; 
   } else {
- 
-    dynamicIconSize = iconSize * 0.8;
-    dynamicOpacity = 0.5; 
+    dynamicIconSize = iconSize * 0.9; 
+    dynamicOpacity = 0.6; 
   }
-
-
 
   useEffect(() => {
     const lottieInstance = lottieRef.current;
@@ -128,13 +122,10 @@ const IconItem: React.FC<IconItemProps> = ({
     }
   }, [isCurrentActiveStage, isStageMet]);
 
-
-
   const handlePress = () => {
     console.log(`IconItem handlePress for ${stage.name}`);
     onPress(stage);
   };
-
 
   return (
     <Pressable
@@ -148,12 +139,20 @@ const IconItem: React.FC<IconItemProps> = ({
         justifyContent: 'center',
         alignItems: 'center',
         opacity: dynamicOpacity,
+        zIndex: 20,      
+        padding: 10, 
       }}
     >
       <LottieView
         ref={lottieRef}
         source={stage.lottieSource}
-        style={{ width: dynamicIconSize, height: dynamicIconSize }}
+        style={{ 
+          width: dynamicIconSize,  
+          height: dynamicIconSize, 
+          position: 'absolute',    
+          top: -dynamicIconSize/2, 
+          left: -dynamicIconSize/2, 
+        }}
         autoPlay={true} 
         loop={isCurrentActiveStage}
         renderMode={Platform.OS === 'android' ? 'HARDWARE' : 'AUTOMATIC'}
@@ -162,28 +161,19 @@ const IconItem: React.FC<IconItemProps> = ({
   );
 };
 
-const AnimatedTimerText: React.FC<{ elapsedTime: number }> = ({ elapsedTime }) => {
-  const totalSecondsValue = Math.max(0, Math.floor(elapsedTime / 1000));
-  const hoursValue = Math.floor(totalSecondsValue / 3600);
-  const minutesValue = Math.floor((totalSecondsValue % 3600) / 60);
-  const secondsValue = totalSecondsValue % 60;
-  const displayTime = `${hoursValue.toString().padStart(2, '0')}:${minutesValue.toString().padStart(2, '0')}:${secondsValue.toString().padStart(2, '0')}`;
-  return <ThemedText style={styles.timeText}>{displayTime}</ThemedText>;
-};
 
-export function AnimatedFastButton({
-  isActive,
-  elapsedTime,
-  targetDuration,
-  onStartPress,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onEndPress,
-  size = defaultButtonSize,
+export function AnimatedFastButton({ 
+  isActive, 
+  elapsedTime, 
+  targetDuration, 
+  onStartPress,  
+  onEndPress: _onEndPress, 
+  size = defaultButtonSize, 
   gradient = DEFAULT_GRADIENT,
   onViewStagesPress,
+  goalDuration
 }: Readonly<AnimatedFastButtonProps>) {
   const navigation = useNavigation();
-  const scale = useSharedValue(1);
   const progress = useSharedValue(0);
   const activeState = useSharedValue(0);
   const buttonSize = useSharedValue(size);
@@ -207,30 +197,12 @@ export function AnimatedFastButton({
     innerSize.value = withSpring(isActive ? size * 0.88 : size * 0.9);
   }, [isActive, size, activeState, buttonSize, innerSize]);
 
-  const onPressIn = () => { scale.value = withSpring(0.95); };
-  const onPressOut = () => { scale.value = withSpring(1); };
+  
 
-  const buttonAnimatedStyle = useAnimatedStyle(() => ({
-    width: buttonSize.value,
-    height: buttonSize.value,
-    transform: [{ scale: scale.value }],
-  }));
+ 
 
-  const innerCircleStyle = useAnimatedStyle(() => ({
-    width: innerSize.value,
-    height: innerSize.value,
-  }));
 
-  const animatedGProps = useAnimatedProps(() => ({
-    opacity: activeState.value,
-  }));
 
-  const progressAnimatedProps = useAnimatedProps(() => {
-    const circumference = (size - 10) * Math.PI;
-    return {
-      strokeDashoffset: interpolate(progress.value, [0, 1], [circumference, 0]),
-    };
-  });
 
   const handleIconPress = (stage: FastingStage) => {
     console.log(`Icon pressed: ${stage.name} (${elapsedHours.toFixed(1)} hours into fast)`);
@@ -250,9 +222,9 @@ export function AnimatedFastButton({
     }
   };
 
-  const renderIcons = () => {
+  const _renderIcons = () => {
     if (!isActive) return null;
-    const baseIconSize = size * 0.18; 
+    const baseIconSize = size * 0.22; 
     return (
       <>
         {fastingStages.map((stage, index) => (
@@ -272,60 +244,149 @@ export function AnimatedFastButton({
     );
   };
 
-  const handleButtonPress = () => {
-    if (isActive) {
-      console.log("Main button pressed while active - no action (End Fast is separate).");
-    } else {
-      onStartPress();
-    }
-  };
+
+ 
+  const goalProgress = isActive && goalDuration ? Math.min(elapsedTime / goalDuration, 1) : 0;
+  const isGoalReached = isActive && goalDuration && elapsedTime >= goalDuration;
+
+
+  const circleRadius = (size - 10) / 2;
+  const stroke = "#0a7ea4";
+  const strokeWidth = 6;
+  const circumference = 2 * Math.PI * circleRadius;
 
   return (
-    <Pressable
-      onPress={handleButtonPress}
-      onPressIn={onPressIn}
-      onPressOut={onPressOut}
-    >
-      <Animated.View style={[styles.button, buttonAnimatedStyle]}>
-         <LinearGradient
-          colors={isActive ? ACTIVE_GRADIENT : gradient}
-          style={styles.gradientContainer}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
-          <Animated.View style={[styles.innerCircle, innerCircleStyle]}>
-            {isActive ? (
-              <View style={styles.contentContainer}>
-                <AnimatedTimerText elapsedTime={elapsedTime} />
-                <ThemedText style={styles.statusText}>Fasting</ThemedText>
-              </View>
+    <View style={styles.container}>
+      <Animated.View style={[styles.button, { width: size, height: size }]}>
+        <LinearGradient
+          colors={gradient}
+          style={[styles.gradientContainer, { width: size, height: size, borderRadius: size / 2 }]}
+        />
+        
+        {/* Goal progress indicator */}
+        {isActive && goalDuration && (
+          <Svg width={size} height={size} style={styles.goalProgressContainer}>
+            {/* Dashed goal indicator circle */}
+            <Circle
+              stroke={isGoalReached ? "#4CAF50" : "#FF5722"}
+              strokeWidth={3}
+              fill="none"
+              cx={size / 2}
+              cy={size / 2}
+              r={size / 2 - 4} 
+              strokeDasharray="8,4" 
+              opacity={0.8}
+            />
+            
+            {/* Goal marker */}
+            <Circle
+              cx={size/2 + (size/2 - 4) * Math.sin(goalProgress * 2 * Math.PI)}
+              cy={size/2 - (size/2 - 4) * Math.cos(goalProgress * 2 * Math.PI)}
+              r={7}
+              fill={isGoalReached ? "#4CAF50" : "#FF5722"}
+            />
+            
+            {/* Goal text */}
+            {isGoalReached ? (
+              <SvgText
+                x={size / 2}
+                y={size - 24}
+                textAnchor="middle"
+                fill="#4CAF50"
+                fontSize={12}
+                fontWeight="bold"
+              >
+                Goal Reached!
+              </SvgText>
             ) : (
-              <View style={styles.contentContainer}>
-                <ThemedText style={styles.startText}>Start</ThemedText>
-                <ThemedText style={styles.startText}>Fasting</ThemedText>
-              </View>
+              <SvgText
+                x={size / 2}
+                y={size - 24}
+                textAnchor="middle"
+                fill="#FF5722"
+                fontSize={12}
+                fontWeight="bold"
+              >
+                Goal: {(goalDuration / (1000 * 60 * 60)).toFixed(0)}h
+              </SvgText>
             )}
-          </Animated.View>
-        </LinearGradient>
-
-        <View style={styles.absoluteContainer} pointerEvents="none">
-           <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-            <AnimatedG transform={`rotate(-90, ${size/2}, ${size/2})`} animatedProps={animatedGProps}>
-              <Circle cx={size / 2} cy={size / 2} r={(size - 10) / 2} stroke="rgba(255, 255, 255, 0.3)" strokeWidth={4} fill="transparent" />
-              <AnimatedCircle cx={size / 2} cy={size / 2} r={(size - 10) / 2} stroke="rgba(255, 255, 255, 0.9)" strokeWidth={4} fill="transparent" strokeDasharray={`${(size - 10) * Math.PI}`} strokeLinecap="round" animatedProps={progressAnimatedProps} />
-            </AnimatedG>
           </Svg>
-        </View>
-
-        <View style={styles.absoluteContainer} pointerEvents="box-none">
-             {renderIcons()}
-        </View>
+        )}
+        
+        {/* Inner animated circle showing progress */}
+        <Pressable 
+          onPress={!isActive ? onStartPress : undefined} 
+          style={[
+            styles.buttonPressable,
+         
+            isActive ? { pointerEvents: 'box-none' } : undefined
+          ]}
+        >
+          <Animated.View style={[styles.innerCircle, { width: size * 0.9, height: size * 0.9 }]}>
+            <View style={styles.contentContainer}>
+              {isActive ? (
+                <>
+                  <ThemedText style={styles.timeText}>
+                    {`${Math.floor(elapsedHours).toString().padStart(2, '0')}:${Math.floor((elapsedHours % 1) * 60).toString().padStart(2, '0')}`}
+                  </ThemedText>
+                  <ThemedText style={styles.statusText}>
+                    {currentActiveStageName ?? "Fasting"}
+                  </ThemedText>
+                  {onViewStagesPress && (
+                    <Pressable 
+                      onPress={onViewStagesPress} 
+                      style={{ 
+                        marginTop: 5,
+                        padding: 10,
+                        zIndex: 25,  
+                      }}
+                    >
+                      <ThemedText style={{ color: '#0a7ea4', fontSize: 12 }}>
+                        View Stages
+                      </ThemedText>
+                    </Pressable>
+                  )}
+                </>
+              ) : (
+                <ThemedText style={styles.startText}>Start{'\n'}Fast</ThemedText>
+              )}
+            </View>
+          </Animated.View>
+        </Pressable>
+        
+        {/* Progress indicator circle */}
+        {isActive && (
+          <Svg
+            width={size}
+            height={size}
+            style={StyleSheet.absoluteFill}
+          >
+            <AnimatedCircle
+              cx={size / 2}
+              cy={size / 2}
+              r={circleRadius}
+              stroke={stroke}
+              strokeWidth={strokeWidth}
+              strokeDasharray={`${circumference} ${circumference}`}
+              strokeDashoffset={circumference * (1 - (targetDuration ? Math.min(elapsedTime / targetDuration, 1) : 0))}
+              strokeLinecap="round"
+              fill="transparent"
+            />
+          </Svg>
+        )}
+        
+        {_renderIcons()}
       </Animated.View>
-    </Pressable>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
   button: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -349,6 +410,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'absolute',
   },
   contentContainer: {
     justifyContent: 'center',
@@ -374,6 +436,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#0a7ea4',
     lineHeight: 28,
+    textAlign: 'center',
   },
   absoluteContainer: {
     ...StyleSheet.absoluteFillObject,
@@ -384,5 +447,25 @@ const styles = StyleSheet.create({
     fontSize: 9,
     color: '#999',
     marginTop: 4,
+  },
+  goalProgressContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+    pointerEvents: 'box-none', 
+  },
+  buttonPressable: {
+    position: 'absolute',
+    width: '90%',
+    height: '90%',
+    borderRadius: 999,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 5,
   },
 });
