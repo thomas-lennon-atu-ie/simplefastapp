@@ -1,6 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
-import { Animated } from 'react-native'; 
+import { Animated, Platform } from 'react-native'; 
 import { createSharedElementStackNavigator } from 'react-navigation-shared-element';
 
 import MainTabNavigator from './MainTabNavigator';
@@ -25,7 +26,10 @@ export type RootStackParamList = {
   FastingStages: { currentElapsedHours?: number; selectedStageName?: string; sharedId?: string };
 };
 
-const Stack = createSharedElementStackNavigator<RootStackParamList>();
+
+const Stack = Platform.OS === 'web' 
+  ? createStackNavigator<RootStackParamList>() 
+  : createSharedElementStackNavigator<RootStackParamList>();
 
 export default function Navigation() {
   const { hasCompletedOnboarding } = useAppContext();
@@ -61,6 +65,7 @@ export default function Navigation() {
               }),
             }}
             
+           
             sharedElements={(route) => {
               const { sharedId } = route.params;
               

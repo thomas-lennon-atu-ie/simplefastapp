@@ -1,6 +1,7 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { RouteProp } from '@react-navigation/native'; 
 import React from 'react';
+import { useWindowDimensions } from 'react-native';
 
 import AccountIcon from '../../assets/icons/account.svg';
 import ChartIcon from '../../assets/icons/chart.svg';
@@ -10,7 +11,6 @@ import GoalsScreen from '../screens/GoalsScreen';
 import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import StatisticsScreen from '../screens/StatisticsScreen';
-
 
 type TabParamList = {
   Home: undefined;
@@ -25,8 +25,8 @@ interface TabBarIconProps {
   color: string;
   size: number;
   routeName: keyof TabParamList;
-  focused: boolean;
 }
+
 
 function TabBarIcon({ color, size, routeName }: Readonly<TabBarIconProps>) {
   switch (routeName) {
@@ -43,16 +43,26 @@ function TabBarIcon({ color, size, routeName }: Readonly<TabBarIconProps>) {
   }
 }
 
-const screenOptions = ({ route }: { route: RouteProp<TabParamList, keyof TabParamList> }) => ({
-  tabBarIcon: ({ focused, color, size }: { focused: boolean; color: string; size: number }) => (
-    <TabBarIcon focused={focused} color={color} size={size} routeName={route.name} />
-  ),
-  tabBarActiveTintColor: '#0a7ea4',
-  tabBarInactiveTintColor: 'gray',
-  headerShown: false,
-});
+
+const renderTabBarIcon = (route: RouteProp<TabParamList, keyof TabParamList>, focused: boolean, color: string, size: number) => {
+ 
+  return <TabBarIcon color={color} size={size} routeName={route.name} />;
+};
 
 export default function MainTabNavigator() {
+  const { width } = useWindowDimensions();
+  const isMobile = width < 768;
+
+ 
+  const screenOptions = ({ route }: { route: RouteProp<TabParamList, keyof TabParamList> }) => ({
+    tabBarIcon: ({ focused, color, size }: { focused: boolean; color: string; size: number }) => 
+      renderTabBarIcon(route, focused, color, size),
+    tabBarActiveTintColor: '#0a7ea4',
+    tabBarInactiveTintColor: 'gray',
+    headerShown: false,
+    tabBarLabel: isMobile ? '' : route.name,
+  });
+
   return (
     <Tab.Navigator screenOptions={screenOptions}>
       <Tab.Screen name="Home" component={HomeScreen} />

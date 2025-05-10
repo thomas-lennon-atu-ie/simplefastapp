@@ -21,8 +21,8 @@ interface FastState {
   targetDuration: number | null;
 }
 
-interface CompletedFast {
-  id?: string;
+export interface CompletedFast {
+  id: string; 
   startTime: Timestamp;
   endTime: Timestamp;
   duration: number;
@@ -105,7 +105,7 @@ export const FastProvider = ({ children }: { children: React.ReactNode }) => {
         history.push({ id: docSnap.id, ...docSnap.data() } as CompletedFast);
       });
      
-      setFastHistory(history.toReversed());
+      setFastHistory(history.slice().reverse());
       setLoading(false);
     }, () => {
     
@@ -161,12 +161,12 @@ export const FastProvider = ({ children }: { children: React.ReactNode }) => {
     const endTime = customEndTime ? Timestamp.fromMillis(customEndTime) : Timestamp.now();
     const duration = endTime.toMillis() - fastState.startTime.toMillis();
 
-    const completedFast: CompletedFast = {
+    const completedFast = {
       startTime: fastState.startTime,
       endTime: endTime,
       duration: duration,
-      targetDuration: fastState.targetDuration,
-    };
+      targetDuration: fastState.targetDuration,      
+    } as Omit<CompletedFast, 'id'>;
 
     try {
       const historyCollectionRef = collection(db, USERS_COLLECTION, userId, HISTORY_SUBCOLLECTION);
