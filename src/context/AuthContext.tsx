@@ -7,6 +7,8 @@ import {
   signOut,
   GoogleAuthProvider,
   signInWithCredential,
+  getAuth,
+  // @ts-expect-error - signInWithPopup is web-only and might not be recognized in this environment
   signInWithPopup
 } from 'firebase/auth';
 import React, { createContext, useState, useEffect, useContext, useMemo, useCallback } from 'react';
@@ -51,29 +53,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signInWithGoogleWeb = async () => {
     try {
+      
+      if (Platform.OS !== 'web') {
+        throw new Error('Attempted to use web sign-in on non-web platform');
+      }
+      
       const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      console.log("Web Google Sign-In Success:", result.user);
-    } catch (error: unknown) { // error is unknown
-      // Type guard: Check if it's an object with a 'code' property (Firebase pattern)
+      const webAuth = getAuth();
+      
+      
+      await signInWithPopup(webAuth, provider);
+      
+      console.log("Web Google Sign-In Popup initiated");
+    } catch (error: unknown) { 
       if (typeof error === 'object' && error !== null && 'code' in error) {
-         // Cast after check to access properties safely
          const codedError = error as { code: string | number; message?: string };
-
-        if (codedError.code === 'auth/popup-closed-by-user') {
-          console.log('Web Google Sign In Cancelled by User');
-        } else if (codedError.code === 'auth/cancelled-popup-request' || codedError.code === 'auth/popup-blocked') {
+        if (codedError.code === 'auth/cancelled-popup-request' || codedError.code === 'auth/popup-blocked') {
           console.log('Web Google Sign In Popup Blocked/Cancelled');
         } else {
-          // Log the specific coded error
           console.error('Web Google Sign In Error:', codedError.code, codedError.message ?? error);
-          throw error; // Re-throw original error object
+          throw error;
         }
-      // Type guard 2: Handle standard Error objects
       } else if (error instanceof Error) {
          console.error('Unexpected Web Google Sign In Error:', error.message);
          throw error;
-      // Type guard 3: Handle anything else
       } else {
         console.error('Unexpected non-object error during Web Google Sign In:', error);
         throw error;
@@ -85,11 +88,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signInWithGoogleNative = async () => {
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-      // Use 'as any' due to inconsistent type definitions for idToken
+      
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const userInfo = await GoogleSignin.signIn() as any;
 
-      // Use optional chaining for SonarLint and check truthiness
+      
       if (!userInfo?.idToken) {
         throw new Error("Native Google Sign-In failed: No ID token received.");
       }
@@ -98,10 +101,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const googleCredential = GoogleAuthProvider.credential(userInfo.idToken);
       await signInWithCredential(auth, googleCredential);
 
-    } catch (error: unknown) { // Use unknown instead of 'any'
-      // Check if the error object has a 'code' property (Google Signin pattern)
+    } catch (error: unknown) { 
+      
       if (typeof error === 'object' && error !== null && 'code' in error) {
-        const gError = error as { code: string | number }; // Cast after check
+        const gError = error as { code: string | number }; 
         if (gError.code === statusCodes.SIGN_IN_CANCELLED) {
           console.log('Native Google Sign In Cancelled');
         } else if (gError.code === statusCodes.IN_PROGRESS) {
@@ -110,20 +113,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           console.log('Native Google Play Services not available');
         } else {
           console.error('Native Google Sign In Error:', gError);
-          throw gError; // Re-throw error
+          throw gError; 
         }
       } else if (error instanceof Error) {
          console.error('Unexpected Native Google Sign In Error:', error.message);
          throw error;
       } else {
-        // Handle unexpected error types
+        
         console.error('Unexpected non-object error during Native Google Sign In:', error);
         throw error;
       }
     }
   };
 
-  // Wrap in useCallback for stability
+
   const signInWithGoogleWebCallback = useCallback(signInWithGoogleWeb, []);
   const signInWithGoogleNativeCallback = useCallback(signInWithGoogleNative, []);
 
@@ -144,7 +147,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
 
       if (Platform.OS !== 'web') {
-        // Keep 'as any' here as a workaround for library type issues
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const isSignedIn = await (GoogleSignin as any).isSignedIn();
         if (isSignedIn) {
@@ -158,8 +160,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } else {
          console.error("Unexpected logout error:", error);
       }
-      // Decide whether to re-throw or just log
-      // throw error;
+     
     }
   };
 
@@ -170,7 +171,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     signInWithGoogle,
     register,
     logout
-  }), [user, loading, signInWithGoogle]); // signInWithGoogle is stable due to useCallback
+  }), [user, loading, signInWithGoogle]); 
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
