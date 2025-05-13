@@ -36,7 +36,7 @@ yarn-error.*
 *.tsbuildinfo
 
 # environmental
-/google-services.json
+
 /serviceaccount-key.json
 /simple-fast.keystore
 /@thomaslennon__simplefast.jks

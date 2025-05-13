@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "32426588093",
+    "project_id": "simplefast-4428e",
+    "storage_bucket": "simplefast-4428e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:32426588093:android:b0247be93fc315fb1a44d4",
+        "android_client_info": {
+          "package_name": "com.tl.simplefast"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "32426588093-c6m0gj9k36u08bmf162d5jk6khn2khqh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tl.simplefast",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "32426588093-slf2cpstk3m5nulgg8o6bm159u8stado.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tl.simplefast",
+            "certificate_hash": "981330a6bc2b41bb0cac33469f86b30e85e2b6b2"
+          }
+        },
+        {
+          "client_id": "32426588093-c2nq8erqrmou1gts2esmm3hgdde8hh11.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxOU8P32DUrSHgxrF-IaUTAZ5SSAEYYyw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "32426588093-c2nq8erqrmou1gts2esmm3hgdde8hh11.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
