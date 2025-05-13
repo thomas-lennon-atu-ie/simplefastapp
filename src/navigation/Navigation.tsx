@@ -1,8 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
-import { Animated, Platform } from 'react-native'; 
-import { createSharedElementStackNavigator } from 'react-navigation-shared-element';
+import { Animated } from 'react-native'; 
 
 import MainTabNavigator from './MainTabNavigator';
 import { useAppContext } from '../context/AppContext';
@@ -12,6 +11,7 @@ import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import SignInScreen from '../screens/auth/SignInScreen';
 import FastingStagesScreen from '../screens/FastingStagesScreen';
+import NotificationSettings from '../screens/NotificationSettings';
 import OnboardingScreen from '../screens/OnboardingScreen';
 
 export type RootStackParamList = {
@@ -22,14 +22,11 @@ export type RootStackParamList = {
   ForgotPassword: undefined;
   Home: undefined;
   Main: undefined;
-
+  NotificationSettings: undefined;
   FastingStages: { currentElapsedHours?: number; selectedStageName?: string; sharedId?: string };
 };
 
-
-const Stack = Platform.OS === 'web' 
-  ? createStackNavigator<RootStackParamList>() 
-  : createSharedElementStackNavigator<RootStackParamList>();
+const Stack = createStackNavigator<RootStackParamList>();
 
 export default function Navigation() {
   const { hasCompletedOnboarding } = useAppContext();
@@ -64,12 +61,19 @@ export default function Navigation() {
                 },
               }),
             }}
-            
-           
-            sharedElements={(route) => {
-              const { sharedId } = route.params;
-              
-              return sharedId ? [sharedId] : [];
+          />
+          <Stack.Screen
+            name="NotificationSettings"
+            component={NotificationSettings}
+            options={{
+              headerShown: false,
+              cardStyleInterpolator: ({ current }: { 
+                current: { progress: Animated.AnimatedInterpolation<number> } 
+              }) => ({
+                cardStyle: {
+                  opacity: current.progress,
+                },
+              }),
             }}
           />
         </>
