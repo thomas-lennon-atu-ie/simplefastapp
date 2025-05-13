@@ -3,6 +3,7 @@
 
 SimpleFast is an intermittent fasting assistant app that helps users track their fasting periods, monitor progress, and achieve their health goals.
 
+![SimpleApp Logo](https://github.com/thomas-lennon-atu-ie/simplefastapp/blob/main/assets/logo.png?raw=true)
 ## Features
 
 -   **Smart Fasting Timer**: Track your active fasts with a beautiful, informative interface
