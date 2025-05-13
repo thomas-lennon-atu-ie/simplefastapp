@@ -8,13 +8,15 @@ import {
   GoogleAuthProvider,
   signInWithCredential,
   getAuth,
+  deleteUser,
   // @ts-expect-error - signInWithPopup is web-only and might not be recognized in this environment
   signInWithPopup
 } from 'firebase/auth';
+import { collection, deleteDoc, doc, getDocs } from 'firebase/firestore';
 import React, { createContext, useState, useEffect, useContext, useMemo, useCallback } from 'react';
 import { Platform } from 'react-native';
 
-import { auth } from '../config/firebase';
+import { db, auth } from '../config/firebase';
 
 type AuthContextType = {
   user: User | null;
@@ -23,6 +25,7 @@ type AuthContextType = {
   signInWithGoogle: () => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -164,14 +167,61 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const deleteAccount = useCallback(async () => {
+    if (!user) {
+      throw new Error('No user is signed in');
+    }
+
+    try {
+      const userId = user.uid;
+      
+      // 1. Delete all user data from Firestore
+      // Delete active fast document
+      await deleteDoc(doc(db, 'users', userId, 'activeFast', 'current'));
+      
+      // Delete fasting history
+      const historyRef = collection(db, 'users', userId, 'fastHistory');
+      const historyDocs = await getDocs(historyRef);
+      for (const doc of historyDocs.docs) {
+        await deleteDoc(doc.ref);
+      }
+      
+      // Delete settings
+      const settingsRef = collection(db, 'users', userId, 'settings');
+      const settingsDocs = await getDocs(settingsRef);
+      for (const doc of settingsDocs.docs) {
+        await deleteDoc(doc.ref);
+      }
+      
+      // Delete user document
+      await deleteDoc(doc(db, 'users', userId));
+      
+      // 2. Delete the Firebase Auth user
+      await deleteUser(user);
+      
+      console.log('Account deleted successfully');
+    } catch (error: unknown) {
+      console.error('Error deleting account:', error);
+      
+      if (error instanceof Error) {
+        console.error("Delete account error:", error.message);
+      } else {
+        console.error("Unexpected delete account error:", error);
+      }
+      
+      throw error;
+    }
+  }, [user]); // Add user as a dependency
+
   const value = useMemo(() => ({
     user,
     loading,
     signIn,
     signInWithGoogle,
     register,
-    logout
-  }), [user, loading, signInWithGoogle]); 
+    logout,
+    deleteAccount
+  }), [user, loading, signInWithGoogle, deleteAccount]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

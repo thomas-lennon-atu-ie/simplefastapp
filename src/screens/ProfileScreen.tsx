@@ -1,8 +1,10 @@
+/* eslint-disable jsx-a11y/accessible-emoji */
 import { ParamListBase, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import React from 'react';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, TouchableOpacity, View, Alert } from 'react-native';
 
+import { ConfirmationModal } from '../components/ConfirmationModal';
 import { ThemedText } from '../components/ThemedText';
 import { ThemedView } from '../components/ThemedView';
 import { useAuth } from '../context/AuthContext';
@@ -13,7 +15,20 @@ type ProfileScreenProps = {
 };
 
 export default function ProfileScreen({ navigation }: Readonly<ProfileScreenProps>) {
-  const { user, logout } = useAuth();
+  const { user, logout, deleteAccount } = useAuth();
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  
+  const handleDeleteAccount = async () => {
+    try {
+      await deleteAccount();      
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      Alert.alert(
+        'Account Deletion Failed',
+        'There was a problem deleting your account. Please try again later.'
+      );
+    }
+  };
   
   return (
     <ThemedView style={styles.container}>
@@ -30,11 +45,29 @@ export default function ProfileScreen({ navigation }: Readonly<ProfileScreenProp
       >
         <View style={styles.buttonContent}>
           {/* Bell emoji as icon */}
-          {/* eslint-disable-next-line jsx-a11y/accessible-emoji */}
           <ThemedText style={styles.bellIcon}>🔔</ThemedText>
           <ThemedText style={styles.notificationButtonText}>Notification Settings</ThemedText>
         </View>
       </TouchableOpacity>
+      
+      {/* Delete Account Button */}
+      <TouchableOpacity 
+        style={styles.deleteButton} 
+        onPress={() => setShowDeleteConfirmation(true)}
+      >
+        <ThemedText style={styles.deleteButtonText}>Delete Account</ThemedText>
+      </TouchableOpacity>
+      
+      {/* Delete Account Confirmation Modal */}
+      <ConfirmationModal
+        visible={showDeleteConfirmation}
+        title="Delete Account"
+        message="Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed."
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={handleDeleteAccount}
+        onCancel={() => setShowDeleteConfirmation(false)}
+      />
     </ThemedView>
   );
 }
@@ -83,5 +116,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
     color: '#0a7ea4',
+  },
+  // New styles for delete account button
+  deleteButton: {
+    marginTop: 40,
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: '#dc3545',
+  },
+  deleteButtonText: {
+    color: '#dc3545',
+    fontSize: 16,
+    fontWeight: '500',
   },
 });
