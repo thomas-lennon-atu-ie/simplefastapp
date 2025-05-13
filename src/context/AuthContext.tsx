@@ -7,7 +7,6 @@ import {
   signOut,
   GoogleAuthProvider,
   signInWithCredential,
-    // @ts-expect-error - signInWithPopup is web-only and might not be recognized in this environment
   signInWithPopup
 } from 'firebase/auth';
 import React, { createContext, useState, useEffect, useContext, useMemo, useCallback } from 'react';
@@ -27,7 +26,7 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 
-// Only configure GoogleSignin on native
+
 if (Platform.OS !== 'web') {
   GoogleSignin.configure({
     webClientId: '32426588093-c2nq8erqrmou1gts2esmm3hgdde8hh11.apps.googleusercontent.com',

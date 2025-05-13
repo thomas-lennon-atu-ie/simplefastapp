@@ -13,6 +13,7 @@ import React, { createContext, useState, useEffect, useContext, useMemo, useCall
 
 import { useAuth } from './AuthContext';
 import { db } from '../config/firebase'; 
+import { scheduleEndOfFastNotification, cancelScheduledNotifications } from '../services/NotificationService';
 
 
 interface FastState {
@@ -197,11 +198,16 @@ export const FastProvider = ({ children }: { children: React.ReactNode }) => {
     const startTime = customStartTime ? Timestamp.fromMillis(customStartTime) : Timestamp.now();
     const targetDuration = duration ?? DEFAULT_FAST_DURATION;
     const newFastState: FastState = { isActive: true, startTime, targetDuration };
-
+    
     try {
       const activeFastDocRef = doc(db, USERS_COLLECTION, userId, ACTIVE_FAST_DOC, 'current');
       await setDoc(activeFastDocRef, newFastState);
       console.log("Firestore: Started fast for user:", userId, newFastState);
+      
+      // Schedule notification for end of fast
+      const endTime = startTime.toMillis() + targetDuration;
+      await scheduleEndOfFastNotification(endTime);
+      
     } catch (error) {
       console.error("Firestore: Error starting fast:", error);
     }
@@ -242,13 +248,14 @@ export const FastProvider = ({ children }: { children: React.ReactNode }) => {
       
       setFastState({ isActive: false, startTime: null, targetDuration: null }); 
     
-
+      // Cancel any scheduled notifications for this fast
+      await cancelScheduledNotifications();
     } catch (error) {
       console.error("Firestore: Error ending fast:", error);
       throw error; 
     }
   
-  }, [userId, fastState, authLoading, setFastState]);
+  }, [userId, authLoading, fastState, setFastState]);
 
   const setFastingGoal = useCallback(async (goal: FastingGoal) => {
     if (authLoading || !userId) return;

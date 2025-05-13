@@ -333,10 +333,21 @@ const styles = StyleSheet.create({
   taglinesWrapper: {
     alignItems: 'center', 
     justifyContent: 'center', 
-    width: '100%', 
+    width: '100%',
+    position: 'relative',
     height: 30
   },
-  taglineBase: { fontSize: 16, color: '#555', textAlign: 'center', position: 'absolute', width: '100%', top: 0, left: 0 },
+  taglineBase: { 
+    fontSize: 16, 
+    color: '#555', 
+    textAlign: 'center', 
+    position: 'absolute',
+    width: '100%',
+    top: 0,
+    alignSelf: 'center',
+    left: 0,
+    right: 0,
+  },
   taglineInitial: {},
   taglineFinal: {},
   taglineHighlight: { fontWeight: 'bold' },

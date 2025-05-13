@@ -16,11 +16,12 @@
       "supportsTablet": true
     },
     "android": {
-      "package": "com.simplefast.app",
+      "package": "com.tl.simplefast",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -31,9 +32,12 @@
       }
     },
     "owner": "thomaslennon",
-    "runtimeVersion": "0.0.6",
+    "runtimeVersion": "0.0.7",
     "updates": {
       "url": "https://u.expo.dev/cc4fda45-3e1f-4ec3-a23a-f57bbfc1be34"
-    }
+    },
+    "plugins": [
+      "@react-native-firebase/app"
+    ]
   }
 }
