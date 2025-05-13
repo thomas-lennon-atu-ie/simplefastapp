@@ -192,6 +192,7 @@ const styles = StyleSheet.create({
   goalDuration: {
     fontSize: 16,
     marginTop: 4,
+    color: '#333',
   },
   goalDescription: {
     fontSize: 14,
@@ -219,6 +220,7 @@ const styles = StyleSheet.create({
   presetName: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: '#333',
   },
   presetDuration: {
     fontSize: 14,

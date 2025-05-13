@@ -1,7 +1,15 @@
 /* eslint-disable jsx-a11y/accessible-emoji */
 import React, { useState, useEffect } from 'react';
 import ApexCharts from 'react-apexcharts';
-import { View, StyleSheet, Platform, FlatList, TouchableOpacity } from 'react-native'; 
+import { 
+  View, 
+  StyleSheet, 
+  Platform, 
+  FlatList, 
+  TouchableOpacity, 
+  ScrollView,
+  useWindowDimensions 
+} from 'react-native'; 
 
 import { ThemedText } from '../components/ThemedText';
 import { ThemedView } from '../components/ThemedView';
@@ -86,126 +94,143 @@ export default function StatisticsScreen() {
     URL.revokeObjectURL(url); // Clean up the object URL
   };
 
+  const { height } = useWindowDimensions();
+  
+  // Create special web-specific styles for the container and scrollview
+  const webScrollViewStyle = Platform.OS === 'web' 
+    ? { 
+        height: height, 
+        overflowY: 'auto',
+        WebkitOverflowScrolling: 'touch'
+      } 
+    : { flex: 1 };
+    
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.title}>Fasting Statistics</ThemedText>
-
-      {/* Chart */}
-      {Platform.OS === 'web' ? (
-        <View style={styles.chartContainer}>
-          <ApexCharts
-            options={{
-              chart: { id: 'fasting-chart' },
-              xaxis: { categories: chartData.categories },
-              yaxis: { 
-                title: { text: 'Hours Fasted' }, 
-                min: 0,
-                max: 24,
-                tickAmount: 7,
-                labels: {
-                  formatter: (val) => Math.round(val).toString()
-                },
-                forceNiceScale: false
-              },
-              title: { text: 'Last 14 Days', align: 'center' },
-              dataLabels: {
-                enabled: true,
-                formatter: (val) => Math.round(Number(val)).toString()
-              },
-              tooltip: {
-                y: {
-                  formatter: (val) => Math.round(val) + " hours"
-                }
-              }
-            }}
-            series={[{ name: 'Hours Fasted', data: chartData.series }]}
-            type="bar"
-            height={300}
-          />
-        </View>
-      ) : (
-        <ThemedText style={styles.chartFallback}>Chart is only available on web.</ThemedText>
-      )}
-
-      <View style={styles.statsCardContainer}>
-        <View style={styles.statsCard}>
-          <View style={styles.statItem}>
-            <View style={[styles.iconContainer, {backgroundColor: '#e3f2fd'}]}>
-              <AccessibleEmoji label="Clock icon representing total hours fasted">🕒</AccessibleEmoji>
-            </View>
-            <View style={styles.statTextContainer}>
-              <ThemedText style={styles.statValue}>{totalHoursFasted.toFixed(0)}</ThemedText>
-              <ThemedText style={styles.statLabel}>Total Hours</ThemedText>
-            </View>
-          </View>
-          
-          <View style={styles.statItem}>
-            <View style={[styles.iconContainer, {backgroundColor: '#e8f5e9'}]}>
-              <AccessibleEmoji label="Trophy icon representing longest fast">🏆</AccessibleEmoji>
-            </View>
-            <View style={styles.statTextContainer}>
-              <ThemedText style={styles.statValue}>{longestFast.toFixed(0)}</ThemedText>
-              <ThemedText style={styles.statLabel}>Longest Fast (h)</ThemedText>
-            </View>
-          </View>
-          
-          <View style={styles.statItem}>
-            <View style={[styles.iconContainer, {backgroundColor: '#fff8e1'}]}>
-              <AccessibleEmoji label="Chart icon representing average fast duration">📊</AccessibleEmoji>
-            </View>
-            <View style={styles.statTextContainer}>
-              <ThemedText style={styles.statValue}>{averageFast.toFixed(1)}</ThemedText>
-              <ThemedText style={styles.statLabel}>Average (h)</ThemedText>
-            </View>
-          </View>
-        </View>
-      </View>
-
-      <View style={styles.filterContainer}>
-        {Array.from({ length: 12 }, (_, i) => (
-          <TouchableOpacity
-            key={i}
-            style={[styles.filterButton, selectedMonth === i && styles.filterButtonActive]}
-            onPress={() => setSelectedMonth(i)}
-          >
-            <ThemedText style={styles.filterButtonText}>{new Date(0, i).toLocaleString('en-US', { month: 'short' })}</ThemedText>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <TouchableOpacity 
-        style={styles.exportButton}
-        onPress={exportToCSV}
+    <ThemedView style={[styles.container, Platform.OS === 'web' && { height: '100vh' }]}>
+      <ScrollView 
+        style={webScrollViewStyle}
+        contentContainerStyle={{ paddingBottom: 80 }}
+        showsVerticalScrollIndicator={true}
       >
-        <ThemedText style={styles.exportButtonText}>Export All Data to CSV</ThemedText>
-      </TouchableOpacity>
+        <ThemedText type="title" style={styles.title}>Fasting Statistics</ThemedText>
 
-     
-      <FlatList
-        data={filteredHistory}
-        keyExtractor={(item: CompletedFast) => item.id ?? `fast-${item.startTime.toMillis()}`}
-        renderItem={({ item, index }: { item: CompletedFast, index: number }) => (
-          <View style={[
-            styles.tableRow, 
-            index % 2 === 0 ? styles.tableRowEven : styles.tableRowOdd
-          ]}>
-            <ThemedText style={styles.tableCell}>{item.startTime.toDate().toLocaleDateString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              year: 'numeric'
-            })}</ThemedText>
-            <ThemedText style={[styles.tableCell, styles.tableCellRight]}>
-              {Math.round(item.duration / (1000 * 60 * 60))} hours
-            </ThemedText>
+        {/* Chart */}
+        {Platform.OS === 'web' ? (
+          <View style={styles.chartContainer}>
+            <ApexCharts
+              options={{
+                chart: { id: 'fasting-chart' },
+                xaxis: { categories: chartData.categories },
+                yaxis: { 
+                  title: { text: 'Hours Fasted' }, 
+                  min: 0,
+                  max: 24,
+                  tickAmount: 7,
+                  labels: {
+                    formatter: (val) => Math.round(val).toString()
+                  },
+                  forceNiceScale: false
+                },
+                title: { text: 'Last 14 Days', align: 'center' },
+                dataLabels: {
+                  enabled: true,
+                  formatter: (val) => Math.round(Number(val)).toString()
+                },
+                tooltip: {
+                  y: {
+                    formatter: (val) => Math.round(val) + " hours"
+                  }
+                }
+              }}
+              series={[{ name: 'Hours Fasted', data: chartData.series }]}
+              type="bar"
+              height={300}
+            />
           </View>
+        ) : (
+          <ThemedText style={styles.chartFallback}>Chart is only available on web.</ThemedText>
         )}
-        ListHeaderComponent={TableHeader}
-        ListEmptyComponent={
-          <View style={styles.emptyTableMessage}>
-            <ThemedText>No fasting data for this month</ThemedText>
+
+        <View style={styles.statsCardContainer}>
+          <View style={styles.statsCard}>
+            <View style={styles.statItem}>
+              <View style={[styles.iconContainer, {backgroundColor: '#e3f2fd'}]}>
+                <AccessibleEmoji label="Clock icon representing total hours fasted">🕒</AccessibleEmoji>
+              </View>
+              <View style={styles.statTextContainer}>
+                <ThemedText style={styles.statValue}>{totalHoursFasted.toFixed(0)}</ThemedText>
+                <ThemedText style={styles.statLabel}>Total Hours</ThemedText>
+              </View>
+            </View>
+            
+            <View style={styles.statItem}>
+              <View style={[styles.iconContainer, {backgroundColor: '#e8f5e9'}]}>
+                <AccessibleEmoji label="Trophy icon representing longest fast">🏆</AccessibleEmoji>
+              </View>
+              <View style={styles.statTextContainer}>
+                <ThemedText style={styles.statValue}>{longestFast.toFixed(0)}</ThemedText>
+                <ThemedText style={styles.statLabel}>Longest Fast (h)</ThemedText>
+              </View>
+            </View>
+            
+            <View style={styles.statItem}>
+              <View style={[styles.iconContainer, {backgroundColor: '#fff8e1'}]}>
+                <AccessibleEmoji label="Chart icon representing average fast duration">📊</AccessibleEmoji>
+              </View>
+              <View style={styles.statTextContainer}>
+                <ThemedText style={styles.statValue}>{averageFast.toFixed(1)}</ThemedText>
+                <ThemedText style={styles.statLabel}>Average (h)</ThemedText>
+              </View>
+            </View>
           </View>
-        }
-      />
+        </View>
+
+        <View style={styles.filterContainer}>
+          {Array.from({ length: 12 }, (_, i) => (
+            <TouchableOpacity
+              key={i}
+              style={[styles.filterButton, selectedMonth === i && styles.filterButtonActive]}
+              onPress={() => setSelectedMonth(i)}
+            >
+              <ThemedText style={styles.filterButtonText}>{new Date(0, i).toLocaleString('en-US', { month: 'short' })}</ThemedText>
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <TouchableOpacity 
+          style={styles.exportButton}
+          onPress={exportToCSV}
+        >
+          <ThemedText style={styles.exportButtonText}>Export All Data to CSV</ThemedText>
+        </TouchableOpacity>
+
+       
+        <FlatList
+          data={filteredHistory}
+          keyExtractor={(item: CompletedFast) => item.id ?? `fast-${item.startTime.toMillis()}`}
+          renderItem={({ item, index }: { item: CompletedFast, index: number }) => (
+            <View style={[
+              styles.tableRow, 
+              index % 2 === 0 ? styles.tableRowEven : styles.tableRowOdd
+            ]}>
+              <ThemedText style={styles.tableCell}>{item.startTime.toDate().toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+              })}</ThemedText>
+              <ThemedText style={[styles.tableCell, styles.tableCellRight]}>
+                {Math.round(item.duration / (1000 * 60 * 60))} hours
+              </ThemedText>
+            </View>
+          )}
+          ListHeaderComponent={TableHeader}
+          ListEmptyComponent={
+            <View style={styles.emptyTableMessage}>
+              <ThemedText>No fasting data for this month</ThemedText>
+            </View>
+          }
+        />
+      </ScrollView>
     </ThemedView>
   );
 }
@@ -346,9 +371,11 @@ const styles = StyleSheet.create({
   },
   tableCell: {
     fontSize: 14,
+    color: '#333',
   },
   tableCellRight: {
     fontWeight: '500',
+    color: '#333',
   },
   emptyTableMessage: {
     padding: 20,

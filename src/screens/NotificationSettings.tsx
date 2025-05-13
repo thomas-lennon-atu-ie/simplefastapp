@@ -1,5 +1,6 @@
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { NavigationProp } from '@react-navigation/native';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getAllScheduledNotificationsAsync } from 'expo-notifications';
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Switch, View, TouchableOpacity, Platform, ActivityIndicator } from 'react-native';
@@ -12,7 +13,8 @@ import {
   NotificationSettings as Settings 
 } from '../services/NotificationService';
 
-// Use proper navigation type instead of any
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function NotificationSettings({ navigation }: Readonly<{ navigation: NavigationProp<any> }>) {
   const [settings, setSettings] = useState<Settings>({
     fastEndEnabled: true,
@@ -146,32 +148,32 @@ export default function NotificationSettings({ navigation }: Readonly<{ navigati
     }
   };
 
-  const debugNotifications = async () => {
-    if (Platform.OS === 'web') {
-      alert('Notifications debugging not available on web');
-      return;
-    }
+  // const debugNotifications = async () => {
+  //   if (Platform.OS === 'web') {
+  //     alert('Notifications debugging not available on web');
+  //     return;
+  //   }
     
-    try {
-      const scheduledNotifications = await getAllScheduledNotificationsAsync();
-      console.log('Currently scheduled notifications:', scheduledNotifications);
+  //   try {
+  //     const scheduledNotifications = await getAllScheduledNotificationsAsync();
+  //     console.log('Currently scheduled notifications:', scheduledNotifications);
       
-      if (scheduledNotifications.length === 0) {
-        alert('No scheduled notifications found');
-      } else {
-        alert(`Found ${scheduledNotifications.length} scheduled notifications. See console for details.`);
-      }
-    } catch (error) {
-      // Fix unknown error type issue
-      if (error instanceof Error) {
-        console.error('Error checking notifications:', error);
-        alert(`Error checking notifications: ${error.message}`);
-      } else {
-        console.error('Unknown error checking notifications:', error);
-        alert('Error checking notifications: Unknown error occurred');
-      }
-    }
-  };
+  //     if (scheduledNotifications.length === 0) {
+  //       alert('No scheduled notifications found');
+  //     } else {
+  //       alert(`Found ${scheduledNotifications.length} scheduled notifications. See console for details.`);
+  //     }
+  //   } catch (error) {
+  //     // Fix unknown error type issue
+  //     if (error instanceof Error) {
+  //       console.error('Error checking notifications:', error);
+  //       alert(`Error checking notifications: ${error.message}`);
+  //     } else {
+  //       console.error('Unknown error checking notifications:', error);
+  //       alert('Error checking notifications: Unknown error occurred');
+  //     }
+  //   }
+  // };
 
   return (
     <ThemedView style={styles.container}>
@@ -192,6 +194,7 @@ export default function NotificationSettings({ navigation }: Readonly<{ navigati
           <View style={styles.content}>
             {/* Add information about time zones */}
             <View style={styles.infoCard}>
+              {/* eslint-disable-next-line jsx-a11y/accessible-emoji */}
               <ThemedText style={styles.infoTitle}>⏰ About Notification Times</ThemedText>
               <ThemedText style={styles.infoText}>
                 • Daily reminders are based on your device&apos;s local time zone
@@ -227,12 +230,12 @@ export default function NotificationSettings({ navigation }: Readonly<{ navigati
               </View>
             )}
 
-            <TouchableOpacity 
+            {/* <TouchableOpacity 
               style={[styles.button, { marginTop: 20 }]} 
               onPress={debugNotifications}
             >
               <ThemedText style={styles.buttonText}>Debug Notifications</ThemedText>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </>
       )}
@@ -317,9 +320,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 10,
     fontSize: 16,
+    color: '#333',
   },
   infoText: {
     fontSize: 14,
     lineHeight: 22,
+    color: '#333',
   },
 });
