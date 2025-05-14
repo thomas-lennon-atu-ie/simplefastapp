@@ -106,7 +106,12 @@ export default function StatisticsScreen() {
     : { flex: 1 };
     
   return (
-    <ThemedView style={[styles.container, Platform.OS === 'web' && { height: '100vh' }]}>
+    <ThemedView 
+      style={[
+        styles.container, 
+        Platform.OS === 'web' && { height: '100vh' as unknown as number }
+      ]}
+    >
       <ScrollView 
         style={webScrollViewStyle}
         contentContainerStyle={{ paddingBottom: 80 }}
