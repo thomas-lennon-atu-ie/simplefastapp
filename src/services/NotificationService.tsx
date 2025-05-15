@@ -1,17 +1,30 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
-const { SchedulableTriggerInputTypes } = Notifications;
 
-// Only set notification handler on native platforms
-if (Platform.OS !== 'web') {
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: false,
-    }),
-  });
+
+let initialized = false;
+
+function initializeNotifications() {
+  if (initialized) return;
+  
+  
+  if (Platform.OS !== 'web') {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+      }),
+    });
+  }
+  
+  initialized = true;
+}
+
+
+export function setupNotifications() {
+  initializeNotifications();
 }
 
 export const NOTIFICATION_SETTINGS_KEY = 'notification_settings';
@@ -50,17 +63,17 @@ export async function checkNotificationPermissions(): Promise<boolean> {
 }
 
 export async function registerForPushNotificationsAsync() {
-  // Only available on native platforms
+ 
   if (Platform.OS === 'web') return null;
   
   let token;
   
-  // Setup notification channels for Android
+
   if (Platform.OS === 'android') {
     try {
       console.log('Setting up Android notification channels...');
       
-      // Main default channel
+
       await Notifications.setNotificationChannelAsync('default', {
         name: 'Default Notifications',
         importance: Notifications.AndroidImportance.MAX,
@@ -68,7 +81,6 @@ export async function registerForPushNotificationsAsync() {
         lightColor: '#0a7ea4',
       });
       
-      // Daily reminders channel
       await Notifications.setNotificationChannelAsync('daily-reminders', {
         name: 'Daily Reminders',
         description: 'Notifications for your daily fasting schedule',
@@ -77,7 +89,6 @@ export async function registerForPushNotificationsAsync() {
         lightColor: '#0a7ea4',
       });
       
-      // Fast completion channel
       await Notifications.setNotificationChannelAsync('fast-completion', {
         name: 'Fast Completion',
         description: 'Notifications when your fast is complete',
@@ -103,7 +114,9 @@ export async function registerForPushNotificationsAsync() {
 }
 
 export async function scheduleEndOfFastNotification(targetEndTime: number) {
-  // Only schedule notifications on native platforms
+  initializeNotifications(); 
+  
+  
   if (Platform.OS === 'web') return null;
   
   console.log(`Attempting to schedule fast end notification for: ${new Date(targetEndTime)}`);
@@ -159,7 +172,7 @@ export async function scheduleEndOfFastNotification(targetEndTime: number) {
 }
 
 export async function scheduleDailyReminder() {
-  // Only schedule notifications on native platforms
+  
   if (Platform.OS === 'web') return null;
   
   const settings = await getNotificationSettings();
@@ -178,14 +191,14 @@ export async function scheduleDailyReminder() {
   console.log(`Scheduling daily reminder for ${hours}:${minutes}`);
   
   const triggerConfig: Notifications.DailyTriggerInput = {
-    type: SchedulableTriggerInputTypes.DAILY,
+    type: Notifications.SchedulableTriggerInputTypes.DAILY,
     hour: hours,
     minute: minutes,
     channelId: 'daily-reminders',
   };
 
   try {
-    // Cancel any existing daily reminders before creating new ones
+
     const scheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
     const dailyReminders = scheduledNotifications.filter(
       notification => notification.content.data?.type === 'daily_reminder'
@@ -221,7 +234,7 @@ export async function scheduleDailyReminder() {
 }
 
 export async function cancelScheduledNotifications() {
-  // Only run on native platforms
+
   if (Platform.OS === 'web') {
     console.log('Notifications not available on web platform - skipping cancelAllScheduledNotificationsAsync');
     return;
@@ -233,7 +246,7 @@ export async function cancelScheduledNotifications() {
 export async function saveNotificationSettings(settings: NotificationSettings) {
   await AsyncStorage.setItem(NOTIFICATION_SETTINGS_KEY, JSON.stringify(settings));
   
-  // Only schedule notifications on native platforms
+
   if (Platform.OS !== 'web' && settings.dailyReminderEnabled) {
     await scheduleDailyReminder();
   }

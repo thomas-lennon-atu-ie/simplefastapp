@@ -37,7 +37,9 @@
   "exclude": [
     "node_modules",
     "babel.config.js",
-    "metro.config.cjs"
+    "metro.config.cjs",
+    "__mocks__/*",
+    "src/__tests__/*"
   ],
   "extends": "expo/tsconfig.base"
 }

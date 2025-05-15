@@ -1,5 +1,6 @@
 import pluginReact from "eslint-plugin-react";
-import tseslint from "typescript-eslint";
+import * as tseslint from "@typescript-eslint/eslint-plugin";
+import parser from "@typescript-eslint/parser";
 import pluginReactHooks from "eslint-plugin-react-hooks";
 import pluginJsxA11y from "eslint-plugin-jsx-a11y";
 import pluginImport from "eslint-plugin-import";
@@ -18,63 +19,37 @@ export default tseslint.config(
       "dist/",
       ".expo/",
       "web-build/",
-      "babel.config.js",
-      "metro.config.js",
-      "eslint.config.js",
+      "babel.config.js", 
+      "metro.config.js", 
+      
     ],
   },
-
+  
   {
-    files: ["**/*.{ts,tsx,js,jsx}"], // Apply broadly
+    files: ["**/*.{ts,tsx}"], 
     languageOptions: {
       globals: {
         ...globals.browser,
         ...globals.node,
         ...globals.es2021,
       },
-      parser: tseslint.parser,
+      parser: parser,
       parserOptions: {
         project: path.resolve(__dirname, "tsconfig.json"),
         tsconfigRootDir: __dirname,
         ecmaFeatures: { jsx: true },
       },
     },
-  },
-  ...tseslint.configs.recommended,
-
-  {
-    files: ["**/*.{ts,tsx,js,jsx}"],
     plugins: {
       react: pluginReact,
       "react-hooks": pluginReactHooks,
       "jsx-a11y": pluginJsxA11y,
+      "@typescript-eslint": tseslint,
     },
     settings: {
       react: {
         version: "detect",
       },
-    },
-    rules: {
-      ...pluginReact.configs.recommended.rules,
-      "react/react-in-jsx-scope": "off",
-      "react/jsx-props-no-spreading": "warn",
-      "react/prop-types": "off",
-
-      ...pluginReactHooks.configs.recommended.rules,
-
-      ...pluginJsxA11y.configs.recommended.rules,
-      "jsx-a11y/accessible-emoji": "warn",
-      "jsx-a11y/anchor-is-valid": "warn",
-      "jsx-a11y/no-autofocus": "warn",
-    },
-  },
-
-  {
-    files: ["**/*.{ts,tsx,js,jsx}"],
-    plugins: {
-      import: pluginImport,
-    },
-    settings: {
       "import/resolver": {
         typescript: {
           project: path.resolve(__dirname, "tsconfig.json"),
@@ -83,6 +58,16 @@ export default tseslint.config(
       },
     },
     rules: {
+      ...tseslint.configs.recommended.rules,
+      ...pluginReact.configs.recommended.rules,
+      "react/react-in-jsx-scope": "off",
+      "react/jsx-props-no-spreading": "warn",
+      "react/prop-types": "off",
+      ...pluginReactHooks.configs.recommended.rules,
+      ...pluginJsxA11y.configs.recommended.rules,
+      "jsx-a11y/accessible-emoji": "warn",
+      "jsx-a11y/anchor-is-valid": "warn",
+      "jsx-a11y/no-autofocus": "warn",
       ...pluginImport.configs.recommended.rules,
       ...pluginImport.configs.typescript.rules,
       "import/no-unresolved": ["error", { ignore: ["^react-native$"] }],
@@ -102,19 +87,45 @@ export default tseslint.config(
         },
       ],
       "import/no-named-as-default-member": "off",
-    },
-  },
-
-  {
-    files: ["**/*.{ts,tsx}"],
-    rules: {
       "@typescript-eslint/no-unused-vars": [
         "warn",
         { argsIgnorePattern: "^_" },
       ],
       "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-require-imports": "error", 
     },
   },
-
-  eslintConfigPrettier
+ 
+  {
+    files: [
+        "**/*.js", 
+        "__mocks__/**/*.js",
+        "jest.config.js",
+        "jest.setup.js",
+        
+    ],
+    languageOptions: {
+        globals: {
+            ...globals.node,
+            ...globals.es2021,
+        },
+        parserOptions: {
+            project: null, 
+            ecmaVersion: "latest",
+            sourceType: "module", 
+        },
+    },
+    plugins: {
+        import: pluginImport,
+    },
+    rules: {
+        
+        "@typescript-eslint/no-var-requires": "off", 
+        "@typescript-eslint/no-require-imports": "off",
+        "import/no-unresolved": ["error", { commonjs: true }], 
+         "react/prop-types": "off", 
+        
+    }
+  },
+  eslintConfigPrettier 
 );
