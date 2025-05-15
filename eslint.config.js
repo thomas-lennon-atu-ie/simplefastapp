@@ -1,131 +1,155 @@
-import pluginReact from "eslint-plugin-react";
-import * as tseslint from "@typescript-eslint/eslint-plugin";
-import parser from "@typescript-eslint/parser";
-import pluginReactHooks from "eslint-plugin-react-hooks";
-import pluginJsxA11y from "eslint-plugin-jsx-a11y";
-import pluginImport from "eslint-plugin-import";
-import eslintConfigPrettier from "eslint-config-prettier";
-import path from "path";
-import globals from "globals";
-import { fileURLToPath } from "url";
+import eslint from "@eslint/js";
+import tseslint from "typescript-eslint";
+import reactPlugin from "eslint-plugin-react";
+import reactHooksPlugin from "eslint-plugin-react-hooks";
+import importPlugin from "eslint-plugin-import";
+import jestPlugin from "eslint-plugin-jest";
+import jsxA11yPlugin from "eslint-plugin-jsx-a11y";
+import rnA11yPlugin from "eslint-plugin-react-native-a11y";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+export default [
+  eslint.configs.recommended,
+  ...tseslint.configs.recommended,
 
-export default tseslint.config(
+
   {
-    ignores: [
-      "node_modules/",
-      "dist/",
-      ".expo/",
-      "web-build/",
-      "babel.config.js", 
-      "metro.config.js", 
-      
-    ],
-  },
-  
-  {
-    files: ["**/*.{ts,tsx}"], 
-    languageOptions: {
-      globals: {
-        ...globals.browser,
-        ...globals.node,
-        ...globals.es2021,
-      },
-      parser: parser,
-      parserOptions: {
-        project: path.resolve(__dirname, "tsconfig.json"),
-        tsconfigRootDir: __dirname,
-        ecmaFeatures: { jsx: true },
-      },
-    },
     plugins: {
-      react: pluginReact,
-      "react-hooks": pluginReactHooks,
-      "jsx-a11y": pluginJsxA11y,
-      "@typescript-eslint": tseslint,
+      react: reactPlugin,
+      "react-hooks": reactHooksPlugin,
+    },
+    rules: {
+      ...reactPlugin.configs.recommended.rules,
+      "react/react-in-jsx-scope": "off",
+      "react/jsx-uses-react": "off",
+      "react-hooks/rules-of-hooks": "error",
+      "react-hooks/exhaustive-deps": "warn",
     },
     settings: {
       react: {
         version: "detect",
       },
-      "import/resolver": {
-        typescript: {
-          project: path.resolve(__dirname, "tsconfig.json"),
-        },
-        node: true,
-      },
+    },
+  },
+
+
+  {
+    plugins: {
+      import: importPlugin,
     },
     rules: {
-      ...tseslint.configs.recommended.rules,
-      ...pluginReact.configs.recommended.rules,
-      "react/react-in-jsx-scope": "off",
-      "react/jsx-props-no-spreading": "warn",
-      "react/prop-types": "off",
-      ...pluginReactHooks.configs.recommended.rules,
-      ...pluginJsxA11y.configs.recommended.rules,
-      "jsx-a11y/accessible-emoji": "warn",
-      "jsx-a11y/anchor-is-valid": "warn",
-      "jsx-a11y/no-autofocus": "warn",
-      ...pluginImport.configs.recommended.rules,
-      ...pluginImport.configs.typescript.rules,
-      "import/no-unresolved": ["error", { ignore: ["^react-native$"] }],
-      "import/namespace": "off",
+      "import/no-unresolved": "error",
+      "import/named": "error",
+      "import/default": "error",
+      "import/export": "error",
       "import/order": [
-        "warn",
+        "error",
         {
           groups: [
             "builtin",
             "external",
             "internal",
-            ["parent", "sibling"],
+            "parent",
+            "sibling",
             "index",
           ],
           "newlines-between": "always",
-          alphabetize: { order: "asc", caseInsensitive: true },
         },
       ],
-      "import/no-named-as-default-member": "off",
+    },
+  },
+
+
+  {
+    files: [
+      "**/*.test.js",
+      "**/*.test.jsx",
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/__tests__/**/*",
+    ],
+    plugins: {
+      jest: jestPlugin,
+    },
+    rules: {
+      ...jestPlugin.configs.recommended.rules,
+    },
+  },
+
+  {
+    plugins: {
+      "jsx-a11y": jsxA11yPlugin,
+      "react-native-a11y": rnA11yPlugin,
+    },
+    rules: {
+      ...jsxA11yPlugin.configs.recommended.rules,
+      ...rnA11yPlugin.configs.recommended.rules,
+ 
+    },
+  },
+
+
+  {
+    rules: {
+      "no-console": "warn",
+      "no-unused-vars": "off", 
+      semi: ["error", "always"],
+      quotes: ["error", "single", { allowTemplateLiterals: true }],
+      indent: ["error", 2, { SwitchCase: 1 }],
+      "comma-dangle": ["error", "always-multiline"],
+    },
+  },
+
+
+  {
+    files: ["**/*.ts", "**/*.tsx"],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        ecmaVersion: "latest",
+        sourceType: "module",
+        ecmaFeatures: {
+          jsx: true,
+        },
+        project: "./tsconfig.json",
+      },
+    },
+    rules: {
       "@typescript-eslint/no-unused-vars": [
         "warn",
         { argsIgnorePattern: "^_" },
       ],
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/explicit-module-boundary-types": "off",
       "@typescript-eslint/no-explicit-any": "warn",
-      "@typescript-eslint/no-require-imports": "error", 
     },
   },
- 
+
+
+  {
+    files: ["**/*.js", "**/*.jsx"],
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      ecmaFeatures: {
+        jsx: true,
+      },
+    },
+  },
+
+  
   {
     files: [
-        "**/*.js", 
-        "__mocks__/**/*.js",
-        "jest.config.js",
-        "jest.setup.js",
-        
+      "**/__tests__/**/*",
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.test.js",
+      "**/*.test.jsx",
+      "**/jest.setup.js",
+      "**/jest.config.js",
     ],
-    languageOptions: {
-        globals: {
-            ...globals.node,
-            ...globals.es2021,
-        },
-        parserOptions: {
-            project: null, 
-            ecmaVersion: "latest",
-            sourceType: "module", 
-        },
-    },
-    plugins: {
-        import: pluginImport,
-    },
     rules: {
-        
-        "@typescript-eslint/no-var-requires": "off", 
-        "@typescript-eslint/no-require-imports": "off",
-        "import/no-unresolved": ["error", { commonjs: true }], 
-         "react/prop-types": "off", 
-        
-    }
+      "no-console": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+    },
   },
-  eslintConfigPrettier 
-);
+];
