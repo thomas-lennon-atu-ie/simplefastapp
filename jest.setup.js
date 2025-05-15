@@ -1,4 +1,4 @@
-/* eslint-disable react/prop-types */
+ 
 import 'react-native-gesture-handler/jestSetup';
 
 jest.mock('react-native/Libraries/NativeModules/specs/NativeSourceCode', () => ({

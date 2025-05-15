@@ -28,18 +28,29 @@
     ]
   },
   "include": [
-    "src",
-    "App.tsx",
+    "src/components/*",
+    "src/screens/*",
+    "src/navigation/*",
+    "src/context/*",
+    "src/services/*",
+    "src/types/*",
     "index.ts",
-    "src/types/svg.d.ts",
-    "env.d.ts"
+    "App.tsx",
+    "env.d.ts",
   ],
   "exclude": [
     "node_modules",
     "babel.config.js",
     "metro.config.cjs",
     "__mocks__/*",
-    "src/__tests__/*"
+    "src/__tests__/*",
+    "teardownGlobalJest.js",
+    "setupGlobalJest.js",
+    "setupBeforeEnv.js",
+    "jest**",
+    "android/**",
+    "build/**",
+    "dist/**",
   ],
   "extends": "expo/tsconfig.base"
 }

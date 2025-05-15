@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/accessible-emoji */
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { NavigationProp } from '@react-navigation/native';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -14,6 +15,7 @@ import {
 } from '../services/NotificationService';
 
 
+ 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function NotificationSettings({ navigation }: Readonly<{ navigation: NavigationProp<any> }>) {
   const [settings, setSettings] = useState<Settings>({
@@ -194,7 +196,7 @@ export default function NotificationSettings({ navigation }: Readonly<{ navigati
           <View style={styles.content}>
             {/* Add information about time zones */}
             <View style={styles.infoCard}>
-              {/* eslint-disable-next-line jsx-a11y/accessible-emoji */}
+              { }
               <ThemedText style={styles.infoTitle}>⏰ About Notification Times</ThemedText>
               <ThemedText style={styles.infoText}>
                 • Daily reminders are based on your device&apos;s local time zone
