@@ -1,4 +1,4 @@
-/* eslint-disable react/jsx-props-no-spreading */
+ 
 import React from 'react';
 import { Text, TextProps, useColorScheme, TextStyle } from 'react-native';
 
@@ -18,6 +18,7 @@ export function ThemedText(props: Readonly<ThemedTextProps>) {
   return (
     <Text
       style={[textStyle, style]}
+      // eslint-disable-next-line react/jsx-props-no-spreading
       {...otherProps}
     />
   );
