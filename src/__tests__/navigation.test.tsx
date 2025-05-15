@@ -14,6 +14,16 @@ jest.mock('../screens/auth/AuthScreen', () =>
 
 jest.mock('../screens/FastingStagesScreen', () => () => <div data-testid="fasting-stages-screen-mock" />);
 
+jest.mock('../config/firebase', () => ({
+  auth: {},
+  firestore: {},
+  storage: {},
+  app: {},
+  initializeFirestore: jest.fn(),
+  persistentLocalCache: jest.fn(),
+  CACHE_SIZE_UNLIMITED: 'unlimited',
+}));
+
 const mockUseAppContext = jest.fn();
 const mockUseAuth = jest.fn();
 
