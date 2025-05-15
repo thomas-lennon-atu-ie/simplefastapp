@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { fireEvent, render } from '@testing-library/react-native';
-import React from 'react';
-import { View, Text } from 'react-native';
+import {  render } from '@testing-library/react-native';
 
 jest.useRealTimers();
 

@@ -18,12 +18,11 @@ class SimpleFastReporter {
   }
 
   onTestResult(test, testResult) {
-    // Get relative path instead of absolute path
     const relativePath = path.relative(this.rootDir, testResult.testFilePath);
     
     this.testResults.push({
       testPath: testResult.testFilePath,
-      testName: relativePath, // Store the relative path as the test name
+      testName: relativePath, 
       status: testResult.numFailingTests > 0 ? 'failed' : 'passed',
       numPassingTests: testResult.numPassingTests,
       numFailingTests: testResult.numFailingTests,
@@ -169,10 +168,11 @@ class SimpleFastReporter {
             width: 100%;
             border-collapse: collapse;
           }
-          .summary-table td {
+          .summary-table th, .summary-table td {
             padding: 8px;
+            text-align: left;
           }
-          .summary-table td:first-child {
+          .summary-table th {
             font-weight: bold;
             width: 200px;
           }
@@ -252,6 +252,21 @@ class SimpleFastReporter {
             display: flex;
             align-items: center;
           }
+          .suite-toggle-button {
+            background-color: #f0f0f0;
+            border: none;
+            width: 100%;
+            text-align: left;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+          .suite-toggle-button:hover {
+            background-color: #e6e6e6;
+          }
         </style>
       </head>
       <body>
@@ -266,26 +281,34 @@ class SimpleFastReporter {
         <div class="summary">
           <h2>Test Summary</h2>
           <table class="summary-table">
-            <tr>
-              <td>Total Duration:</td>
-              <td>${duration.toFixed(2)} seconds</td>
-            </tr>
-            <tr>
-              <td>Test Suites:</td>
-              <td>${results.numPassedTestSuites} passed, ${results.numFailedTestSuites} failed, ${results.numTotalTestSuites} total</td>
-            </tr>
-            <tr>
-              <td>Tests:</td>
-              <td>${results.numPassedTests} passed, ${results.numFailedTests} failed, ${results.numPendingTests} pending, ${results.numTotalTests} total</td>
-            </tr>
-            <tr>
-              <td>Start Time:</td>
-              <td>${this.startTime.toLocaleString()}</td>
-            </tr>
-            <tr>
-              <td>End Time:</td>
-              <td>${this.endTime.toLocaleString()}</td>
-            </tr>
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Total Duration:</td>
+                <td>${duration.toFixed(2)} seconds</td>
+              </tr>
+              <tr>
+                <td>Test Suites:</td>
+                <td>${results.numPassedTestSuites} passed, ${results.numFailedTestSuites} failed, ${results.numTotalTestSuites} total</td>
+              </tr>
+              <tr>
+                <td>Tests:</td>
+                <td>${results.numPassedTests} passed, ${results.numFailedTests} failed, ${results.numPendingTests} pending, ${results.numTotalTests} total</td>
+              </tr>
+              <tr>
+                <td>Start Time:</td>
+                <td>${this.startTime.toLocaleString()}</td>
+              </tr>
+              <tr>
+                <td>End Time:</td>
+                <td>${this.endTime.toLocaleString()}</td>
+              </tr>
+            </tbody>
           </table>
         </div>
 
@@ -322,14 +345,18 @@ class SimpleFastReporter {
         
         html += `
           <div class="suite">
-            <div class="suite-header" onclick="toggleSuite('${suiteId}')">
+            <button type="button" class="suite-toggle-button" id="toggle-${suiteId}" 
+                   onclick="toggleSuite('${suiteId}')" 
+                   onkeydown="handleKeyDown(event, '${suiteId}')"
+                   aria-expanded="false" 
+                   aria-controls="${suiteId}">
               <div class="suite-header-left">
                 <span class="toggle-icon" id="icon-${suiteId}">+</span>
                 <div class="test-name">${suite.name} <span class="${suite.status}">(${suite.status})</span></div>
               </div>
               <div class="duration">${(suite.duration / 1000).toFixed(2)}s</div>
-            </div>
-            <div id="${suiteId}" class="suite-content">
+            </button>
+            <div id="${suiteId}" class="suite-content" aria-hidden="true">
               <table class="test-table">
                 <thead>
                   <tr>
@@ -369,13 +396,26 @@ class SimpleFastReporter {
           function toggleSuite(id) {
             const content = document.getElementById(id);
             const icon = document.getElementById('icon-' + id);
+            const button = document.getElementById('toggle-' + id);
+            const isExpanded = content.classList.contains('visible');
             
-            if (content.classList.contains('visible')) {
+            if (isExpanded) {
               content.classList.remove('visible');
               icon.textContent = '+';
+              button.setAttribute('aria-expanded', 'false');
+              content.setAttribute('aria-hidden', 'true');
             } else {
               content.classList.add('visible');
               icon.textContent = '-';
+              button.setAttribute('aria-expanded', 'true');
+              content.setAttribute('aria-hidden', 'false');
+            }
+          }
+          
+          function handleKeyDown(event, id) {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              toggleSuite(id);
             }
           }
         </script>
