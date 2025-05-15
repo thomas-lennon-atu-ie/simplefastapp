@@ -55,6 +55,7 @@ export default function OnboardingScreen(_props: Readonly<OnboardingScreenProps>
   };
 
   
+   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const renderItem = ({ item, index }: { item: any; index: number }) => {
     return (

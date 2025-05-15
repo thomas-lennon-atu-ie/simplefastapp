@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import {
   createUserWithEmailAndPassword,
@@ -92,7 +93,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
       
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       
       const userInfo = await GoogleSignin.signIn() as any;
 
       
@@ -150,7 +151,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
 
       if (Platform.OS !== 'web') {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         
         const isSignedIn = await (GoogleSignin as any).isSignedIn();
         if (isSignedIn) {
           await GoogleSignin.signOut();

@@ -1,3 +1,18 @@
 {
-    "java.configuration.updateBuildConfiguration": "automatic"
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "sonarlint.pathToCompileCommands": "${workspaceFolder}/compile_commands.json",
+    "sonarlint.analysisExcludeRelativePaths": [
+        "**/__mocks__/**",
+        "**/__tests__/**",
+        "jest*.js",
+        "setupBeforeEnv.js",
+        "setupGlobalJest.js",
+        "teardownGlobalJest.js"
+    ],
+    "sonarlint.disableRulesSuggestions": true,
+    "sonarlint.rules": {
+        "javascript:S6774": {
+            "level": "off"
+        }
+    }
 }

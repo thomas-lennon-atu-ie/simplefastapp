@@ -21,11 +21,29 @@ export default tseslint.config(
       "babel.config.js",
       "metro.config.js",
       "eslint.config.js",
+        "__mocks__/*",
+    "src/__tests__/*",
+    "teardownGlobalJest.js",
+    "setupGlobalJest.js",
+    "setupBeforeEnv.js",
+    "jest**",
+    "android/**",
+    
     ],
   },
 
   {
-    files: ["**/*.{ts,tsx,js,jsx}"], // Apply broadly
+    files: ["**/*.{ts,tsx,js,jsx}"],
+    ignores: [
+      "**/__tests__/**",
+      "**/__mocks__/**",
+      "**/*.test.{ts,tsx,js,jsx}",
+      "jest**",
+      "setupBeforeEnv.js",
+      "setupGlobalJest.js",
+      "teardownGlobalJest.js",
+      "android/**",
+    ],
     languageOptions: {
       globals: {
         ...globals.browser,
@@ -41,6 +59,28 @@ export default tseslint.config(
     },
   },
   ...tseslint.configs.recommended,
+
+  {
+    files: [
+      "**/__tests__/**/*.{ts,tsx,js,jsx}",
+      "**/__mocks__/**/*.{ts,tsx,js,jsx}",
+      "**/*.test.{ts,tsx,js,jsx}",
+    ],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        ...globals.jest,
+        ...globals.es2021,
+      },
+     
+      parser: tseslint.parser,
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+        project: null, 
+      },
+    },
+  },
 
   {
     files: ["**/*.{ts,tsx,js,jsx}"],
@@ -107,12 +147,40 @@ export default tseslint.config(
 
   {
     files: ["**/*.{ts,tsx}"],
+    ignores: [
+    "__mocks__/*",
+    "src/__tests__/*",
+    "teardownGlobalJest.js",
+    "setupGlobalJest.js",
+    "setupBeforeEnv.js",
+    "jest**",
+    "android/**",
+    ],
     rules: {
       "@typescript-eslint/no-unused-vars": [
         "warn",
         { argsIgnorePattern: "^_" },
       ],
       "@typescript-eslint/no-explicit-any": "warn",
+    },
+  },
+
+  {
+    files: [
+      "**/__tests__/**/*.{ts,tsx,js,jsx}",
+      "**/__mocks__/**/*.{ts,tsx,js,jsx}",
+      "**/*.test.{ts,tsx,js,jsx}",
+      "jest**",
+      "setupBeforeEnv.js",
+      "setupGlobalJest.js",
+      "teardownGlobalJest.js",
+    ],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-non-null-assertion": "off",
+      "import/no-extraneous-dependencies": "off",
+
     },
   },
 
