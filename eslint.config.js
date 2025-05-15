@@ -6,11 +6,45 @@ import importPlugin from "eslint-plugin-import";
 import jestPlugin from "eslint-plugin-jest";
 import jsxA11yPlugin from "eslint-plugin-jsx-a11y";
 import rnA11yPlugin from "eslint-plugin-react-native-a11y";
+import eslintConfigPrettier from "eslint-config-prettier";
+import path from "path";
+import globals from "globals";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export default [
+  {
+    ignores: [
+      "node_modules/",
+      "dist/",
+      ".expo/",
+      "web-build/",
+      "babel.config.js",
+      "metro.config.js",
+    ],
+  },
+
+  {
+    files: ["**/*.{ts,tsx,js,jsx}"],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        ...globals.es2021,
+      },
+      parser: tseslint.parser,
+      parserOptions: {
+        project: path.resolve(__dirname, "tsconfig.json"),
+        tsconfigRootDir: __dirname,
+        ecmaFeatures: { jsx: true },
+      },
+    },
+  },
+
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
-
 
   {
     plugins: {
@@ -21,6 +55,8 @@ export default [
       ...reactPlugin.configs.recommended.rules,
       "react/react-in-jsx-scope": "off",
       "react/jsx-uses-react": "off",
+      "react/jsx-props-no-spreading": "warn",
+      "react/prop-types": "off",
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
     },
@@ -31,33 +67,53 @@ export default [
     },
   },
 
+  {
+    plugins: {
+      "jsx-a11y": jsxA11yPlugin,
+      "react-native-a11y": rnA11yPlugin,
+    },
+    rules: {
+      ...jsxA11yPlugin.configs.recommended.rules,
+      "jsx-a11y/accessible-emoji": "warn",
+      "jsx-a11y/anchor-is-valid": "warn",
+      "jsx-a11y/no-autofocus": "warn",
+    },
+  },
 
   {
     plugins: {
       import: importPlugin,
     },
+    settings: {
+      "import/resolver": {
+        typescript: {
+          project: path.resolve(__dirname, "tsconfig.json"),
+        },
+        node: true,
+      },
+    },
     rules: {
-      "import/no-unresolved": "error",
-      "import/named": "error",
-      "import/default": "error",
-      "import/export": "error",
+      ...importPlugin.configs.recommended.rules,
+      ...importPlugin.configs.typescript.rules,
+      "import/no-unresolved": ["error", { ignore: ["^react-native$"] }],
+      "import/namespace": "off",
       "import/order": [
-        "error",
+        "warn",
         {
           groups: [
             "builtin",
             "external",
             "internal",
-            "parent",
-            "sibling",
+            ["parent", "sibling"],
             "index",
           ],
           "newlines-between": "always",
+          alphabetize: { order: "asc", caseInsensitive: true },
         },
       ],
+      "import/no-named-as-default-member": "off",
     },
   },
-
 
   {
     files: [
@@ -76,19 +132,6 @@ export default [
   },
 
   {
-    plugins: {
-      "jsx-a11y": jsxA11yPlugin,
-      "react-native-a11y": rnA11yPlugin,
-    },
-    rules: {
-      ...jsxA11yPlugin.configs.recommended.rules,
-      ...rnA11yPlugin.configs.recommended.rules,
- 
-    },
-  },
-
-
-  {
     rules: {
       "no-console": "warn",
       "no-unused-vars": "off", 
@@ -102,17 +145,6 @@ export default [
 
   {
     files: ["**/*.ts", "**/*.tsx"],
-    languageOptions: {
-      parser: tseslint.parser,
-      parserOptions: {
-        ecmaVersion: "latest",
-        sourceType: "module",
-        ecmaFeatures: {
-          jsx: true,
-        },
-        project: "./tsconfig.json",
-      },
-    },
     rules: {
       "@typescript-eslint/no-unused-vars": [
         "warn",
@@ -124,19 +156,6 @@ export default [
     },
   },
 
-
-  {
-    files: ["**/*.js", "**/*.jsx"],
-    languageOptions: {
-      ecmaVersion: "latest",
-      sourceType: "module",
-      ecmaFeatures: {
-        jsx: true,
-      },
-    },
-  },
-
-  
   {
     files: [
       "**/__tests__/**/*",
@@ -152,4 +171,6 @@ export default [
       "@typescript-eslint/no-explicit-any": "off",
     },
   },
+
+  eslintConfigPrettier,
 ];
