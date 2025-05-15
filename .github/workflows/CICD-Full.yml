@@ -38,8 +38,7 @@ jobs:
           
       - name: Install testing dependencies
         run: |
-          npm install --no-save @testing-library/dom @testing-library/react
-        
+          npm install --no-save @testing-library/dom @testing-library/react --legacy-peer-deps
       - name: Run tests
         run: npm test -- --watchAll=false || echo "Tests failed but continuing"
 
