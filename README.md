@@ -140,6 +140,12 @@ The GitHub Actions workflow handles continuous integration and deployment:
 5.  End your fast when complete
 6.  View your statistics to track improvement over time
 
+
+## Demo
+https://github.com/user-attachments/assets/0af51ccd-5066-4b97-8385-6f280bd3d44d
+
+
+
 ## Security
 
 For security issues, please refer to SECURITY.md for reporting guidelines.
