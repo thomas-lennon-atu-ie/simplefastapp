@@ -6,9 +6,9 @@ The following versions of the SimpleFast application will be receiving security 
 
 | Version | Supported          |
 |---------|--------------------|
-| 2.x.x   | :white_check_mark: |
-| 1.1.x   | :white_check_mark: |
-| 0.x.x   | :x:                |
+| 1.x.x   | :white_check_mark: |
+| 0.1.x   | :white_check_mark: |
+| 0.0.x   | :x:                |
 
 Versions marked with :x: are no longer supported, we encourage users to upgrade to the latest supported version to ensure ongoing security.
 
