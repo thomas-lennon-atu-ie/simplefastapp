@@ -9,6 +9,9 @@ on:
     branches: [ main, develop ]
   workflow_dispatch:  # manual trigger
 
+permissions:
+  contents: read
+
 jobs:
   # code quality checking - runs for all branches/PRs
   lint_test:
@@ -133,6 +136,8 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-')
     runs-on: ubuntu-latest
     environment: Production
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       
